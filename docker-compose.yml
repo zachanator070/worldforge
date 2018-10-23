@@ -1,0 +1,29 @@
+version: "3"
+services:
+
+  webapp:
+    image: "node:latest"
+    user: "node"
+    working_dir: /home/node/app
+    env_file:
+      - .env
+    volumes:
+    - ./:/home/node/app
+    ports:
+    - "${API_PORT:-3000}:${API_PORT:-3000}"
+    - "9229:9229"
+    command: "npm run start-dev"
+    depends_on:
+      - mongodb
+    networks:
+      - rptools
+
+  mongodb:
+    image: "mongo:latest"
+    ports:
+      - "27017:27017"
+    networks:
+    - rptools
+
+networks:
+  rptools:

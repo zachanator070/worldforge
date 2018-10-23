@@ -4,12 +4,13 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
 	entry: {
+		polly: 'babel-polyfill',
 		app: './src/app/index.js'
 	},
 	plugins: [
 		new CleanWebpackPlugin(['dist']),
 		new HtmlWebpackPlugin({
-			title: 'rstools',
+			title: 'rptools',
 			template: __dirname + "/src/app/index.html"
 		})
 	],
@@ -26,7 +27,13 @@ module.exports = {
 				use: {
 					loader: "babel-loader",
 					options: {
-						"presets": ["@babel/env", "@babel/react"]
+						"presets": [
+							"@babel/env",
+							"@babel/react"
+						],
+						"plugins": [
+							"@babel/plugin-proposal-class-properties"
+						]
 					}
 				}
 			},
