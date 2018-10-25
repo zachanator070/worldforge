@@ -1,10 +1,10 @@
+import WorldActionFactory from "./worldactionfactory";
+import UIActionFactory from "./uiactionfactory";
 
 class LoginActionFactory{
-	static LOGIN_START = 'LOGIN_START';
+
 	static LOGIN_SUCCESS = 'LOGIN_SUCCESS';
 	static LOGIN_ERROR = 'LOGIN_ERROR';
-
-	static CLEAR_LOGIN_ERROR = 'CLEAR_LOGIN_ERROR';
 
 	static LOGOUT_SUCCESS = 'LOGOUT_SUCCESS';
 	static LOGOUT_ERROR = 'LOGOUT_ERROR';
@@ -12,8 +12,6 @@ class LoginActionFactory{
 	static tryLogin(username, password) {
 		return async (dispatch, getState, apiClient) => {
 			try{
-				dispatch(this.createLoginStartAction());
-				dispatch(this.createClearLoginError());
 				await apiClient.login(username, password);
 				let user = await apiClient.getCurrentUser();
 				dispatch(this.createLoginSuccessAction(user));
@@ -34,12 +32,6 @@ class LoginActionFactory{
 		}
 	}
 
-	static createLoginStartAction(){
-		return {
-			type: LoginActionFactory.LOGIN_START
-		}
-	}
-
 	static createLoginErrorAction(error){
 		return {
 			type: LoginActionFactory.LOGIN_ERROR,
@@ -48,9 +40,20 @@ class LoginActionFactory{
 	}
 
 	static createLoginSuccessAction(user) {
-		return {
-			type: LoginActionFactory.LOGIN_SUCCESS,
-			user: user
+		return async (dispatch, getState, api) => {
+			dispatch({
+				type: LoginActionFactory.LOGIN_SUCCESS,
+				user: user
+			});
+			dispatch(UIActionFactory.showLoginModal(false));
+			let world = getState().currentWorld;
+			if(getState().currentWorld){
+				world = await api.getWorld(user.currentWorld);
+			}
+			if(world === null || world._id !== user.currentWorld){
+				dispatch(WorldActionFactory.selectWorld(world));
+			}
+			dispatch(WorldActionFactory.fetchAvailableWorlds());
 		}
 	}
 
@@ -59,8 +62,9 @@ class LoginActionFactory{
 			try{
 				await apiClient.logout();
 				dispatch(this.createLogoutSuccessAction());
+				dispatch(WorldActionFactory.fetchAvailableWorlds());
 			} catch(error){
-				dispatch(this.createLogoutActionError(error.error))
+				dispatch(this.createLogoutActionError(error.message))
 			}
 		}
 	}
@@ -76,12 +80,6 @@ class LoginActionFactory{
 			type: LoginActionFactory.LOGOUT_ERROR,
 			error: error
 		};
-	}
-
-	static createClearLoginError(){
-		return {
-			type: LoginActionFactory.CLEAR_LOGIN_ERROR
-		}
 	}
 }
 

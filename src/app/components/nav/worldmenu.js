@@ -1,41 +1,25 @@
 import React, {Component} from 'react';
 import {Dropdown, Icon, Menu} from "antd";
-import CreateWorldForm from "../worldmanager/createworldform";
-import SelectWorldForm from "../worldmanager/selectworldform";
+import CreateWorldForm from "../modals/createworldmodal";
+import Selectworldmodal from "../modals/selectworldmodal";
 
 class WorldMenu extends Component{
 
 	constructor(props){
 		super(props);
-		this.state = {
-			showCreateWorld: false,
-			showSelectWorld: false
-		}
 	}
-
-	selectWorldCallback = (world) => {
-		this.setState({showSelectWorld: false});
-		if(world){
-			this.props.dispatchWorldSelected(world);
-		}
-	};
-
-	createWorldCallback = (world) => {
-		this.setState({showCreateWorld: false});
-		if(world){
-			this.props.dispatchWorldSelected(world);
-		}
-	};
 
 	render(){
 
 		const menu = (
 			<Menu>
-				<Menu.Item key="0">
-					<a href="#" onClick={() => {this.setState({showCreateWorld: true})}}>New World</a>
-				</Menu.Item>
+				{(this.props.currentUser !== null ?
+					<Menu.Item key="0">
+						<a href="#" onClick={() => {this.props.showCreateWorldModal(true)}}>New World</a>
+					</Menu.Item>
+					: null)}
 				<Menu.Item key="1">
-					<a href="#" onClick={() => {this.setState({showSelectWorld: true})}}>Select World</a>
+					<a href="#" onClick={() => {this.props.showSelectWorldModal(true)}}>Select World</a>
 				</Menu.Item>
 			</Menu>
 		);
@@ -44,11 +28,9 @@ class WorldMenu extends Component{
 			<div>
 				<Dropdown overlay={menu} trigger={['click']}>
 					<a className="ant-dropdown-link" href="#">
-						{this.props.world ? this.props.world.name : 'No World Selected' } <Icon type="down" />
+						{this.props.currentWorld ? this.props.currentWorld.name : 'No World Selected' } <Icon type="down" />
 					</a>
 				</Dropdown>
-				<CreateWorldForm show={this.state.showCreateWorld} callback={this.createWorldCallback}/>
-				<SelectWorldForm show={this.state.showSelectWorld} callback={this.selectWorldCallback}/>
 			</div>
 		);
 	}

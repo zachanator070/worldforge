@@ -6,38 +6,37 @@ import "antd/dist/antd.css";
 
 import NavbarContainer from "./nav/navbarcontainer";
 import {BrowserRouter, Route, Switch} from "react-router-dom";
-import MapView from "./mapcontainer";
+import MapView from "./map/mapcontainer";
 import LoginActionFactory from "../redux/actions/loginactionfactory";
+import ModalsContainer from "./modals/modalscontainer";
+import WorldActionFactory from "../redux/actions/worldactionfactory";
 
 class App extends Component {
 
 	componentDidMount(){
-		if(!this.props.loggedIn.user){
+		if(!this.props.currentUser){
 			this.props.dispatchResumeSession();
 		}
+		this.props.fetchAvailableWorlds();
 	}
 
 	render() {
 
-		// let mapContainer = <MapView
-		// 	loggedIn={this.props.loggedIn}
-		// 	world={this.props.currentWorld}
-		// 	dispatchWorldSelected={this.props.dispatchWorldSelected}
-		// />;
 		return (
 			<div>
+				<ModalsContainer/>
 				<NavbarContainer/>
-				{/*<div>*/}
-					{/*<BrowserRouter>*/}
-						{/*<Switch>*/}
-							{/*/!*<Route path="/ui/worldmanager" render={(props) => {return (<WorldManager loggedIn={this.props.loggedIn} currentSelectedWorld={this.props.currentSelectedWorld}/>);}}/>*!/*/}
-							{/*/!*<Route path="/ui/imagemanager" component={ImageManager}/>*!/*/}
-							{/*/!*<Route path="/ui/wiki" component={Wiki}/>*!/*/}
-							{/*<Route path="/ui/map/:mapId" render={(props) => {return mapContainer;}}/>*/}
-							{/*<Route path="/" render={(props) => {return mapContainer;}}/>*/}
-						{/*</Switch>*/}
-					{/*</BrowserRouter>*/}
-				{/*</div>*/}
+				<div>
+					<BrowserRouter>
+						<Switch>
+							{/*<Route path="/ui/worldmanager" render={(props) => {return (<WorldManager loggedIn={this.props.loggedIn} currentSelectedWorld={this.props.currentSelectedWorld}/>);}}/>*/}
+							{/*<Route path="/ui/imagemanager" component={ImageManager}/>*/}
+							{/*<Route path="/ui/wiki" component={Wiki}/>*/}
+							<Route path="/ui/map/:mapId" component={MapView}/>
+							<Route path="/" component={MapView}/>
+						</Switch>
+					</BrowserRouter>
+				</div>
 			</div>
 		);
 	}
@@ -45,7 +44,7 @@ class App extends Component {
 
 const mapStateToProps = state => {
 	return {
-		loggedIn: state.loggedIn,
+		currentUser: state.currentUser,
 	}
 };
 
@@ -53,6 +52,9 @@ const mapDispatchToProps = dispatch => {
 	return {
 		dispatchResumeSession: () => {
 			dispatch(LoginActionFactory.resumeSession())
+		},
+		fetchAvailableWorlds: () => {
+			dispatch(WorldActionFactory.fetchAvailableWorlds());
 		}
 	}
 };

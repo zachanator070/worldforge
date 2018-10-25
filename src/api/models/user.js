@@ -7,9 +7,22 @@ const setPassword = (password) => {
 };
 
 const userSchema = Schema({
-	email: String ,
-	password_hash: { type: String, set: setPassword},
-	currentWorld: String
+	email: {
+		type: String,
+		required: [true, 'email field required']
+	},
+	displayName: {
+		type: String,
+		required: [true, 'displayName field required']
+	},
+	password_hash: {
+		type: String,
+		required: [true, 'password_hash missing'],
+		set: setPassword},
+	currentWorld: {
+		type: mongoose.Schema.ObjectId,
+		ref: 'World'
+	}
 });
 
 userSchema.methods.validPassword = function (password) {

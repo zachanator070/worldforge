@@ -10,6 +10,7 @@ class RegisterModal extends Component {
 			password: '',
 			repeatPassword: '',
 			error: '',
+			displayName: ''
 		};
 	}
 
@@ -34,42 +35,10 @@ class RegisterModal extends Component {
 		});
 	};
 
-	register = () => {
-		this.hideRegister();
-		if(this.state.repeatPassword !== this.state.password){
-			this.setState({
-				error: "Passwords do not match!"
-			});
-			return;
-		}
-		fetch(
-			'/api/auth/register',
-			{
-				method: 'POST',
-				headers: {
-					"Content-type": "application/json"
-				},
-				body: JSON.stringify(this.state)
-			}
-		).then((response) => {
-			if(response.status === 200){
-				fetch(
-					'/api/users/current',
-					{
-						method: "GET"
-					}
-				).then((userResponse) => {
-					userResponse.json().then((data) => {
-						this.props.callback(data);
-					});
-				});
-			} else {
-				response.json().then((data) => {
-				this.setState({
-					error: data.error
-				});
-			});
-		}
+	updateDisplayName = (event) => {
+		const value = event.target.value;
+		this.setState((state) => {
+			return { displayName: value };
 		});
 	};
 
@@ -84,9 +53,9 @@ class RegisterModal extends Component {
 					title="Register"
 					visible={this.props.show}
 					centered
-					onCancel={this.hideRegister}
+					onCancel={this.props.cancel}
 					footer={[
-						<Button type='primary' onClick={this.register}>Register</Button>
+						<Button type='primary' onClick={() => {this.props.register(this.state.email, this.state.password, this.state.displayName)}}>Register</Button>
 					]}
 				>
 					{errorBox}
@@ -100,6 +69,17 @@ class RegisterModal extends Component {
 									prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />}
 									value={this.state.email}
 									onChange={this.updateEmail}/>
+							</div>
+						</div>
+						<div className='text-align-right'>
+							Display Name:
+							<div className='margin-sm width-65 inline-block'>
+								<Input
+									className='width-65'
+									placeholder="DragonSlayer1234"
+									prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />}
+									value={this.state.displayName}
+									onChange={this.updateDisplayName}/>
 							</div>
 						</div>
 						<div className='text-align-right'>

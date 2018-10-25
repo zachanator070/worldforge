@@ -1,11 +1,12 @@
-const AuthRouter = require("./routes/api/authrouter.js");
-const UiRouter = require("./routes/ui/uirouter.js");
+const AuthRouter = require("./routes/api/authrouter");
+const UiRouter = require("./routes/ui/uirouter");
 const UsersRouter = require("./routes/api/usersrouter");
 const WorldRouter = require('./routes/api/worldrouter');
+const WikiPageRouter = require('./routes/api/wikipagerouter');
 
 const mongoose = require("mongoose");
 const mongodb_host = process.env.MONGODB_HOST || "mongodb";
-const mongodb_db_name = process.env.MONGODB_DB_NAME || "rptools";
+const mongodb_db_name = process.env.MONGODB_DB_NAME || "worldforge";
 mongoose.connect(`mongodb://${mongodb_host}/${mongodb_db_name}`, { useNewUrlParser: true });
 
 const express = require("express");
@@ -33,7 +34,8 @@ app.get('/', (req, res) => {
 });
 app.use("/ui", UiRouter);
 app.use('/api/auth', AuthRouter);
-app.use('/api/users', passportConfig.loggedInMiddleware, UsersRouter);
+app.use('/api/users', UsersRouter);
 app.use('/api/worlds', WorldRouter);
+app.use('/api/wikiPages', WikiPageRouter);
 
 app.listen(port, () => console.log(`listening on port ${port}`));

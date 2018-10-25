@@ -7,7 +7,8 @@ function setupPassport(){
 	passport.use('local-login', new LocalStrategy(
 		{
 			usernameField : 'email',
-			passwordField : 'password'
+			passwordField : 'password',
+
 		},
 		function(email, password, done) {
 			User.findOne({ email: email }, function (err, user) {
@@ -27,45 +28,48 @@ function setupPassport(){
 		{
 			usernameField : 'email',
 			passwordField : 'password',
+			passReqToCallback: true
 		},
-		function(email, password, done) {
+		function(req, email, password, done) {
 
-			// asynchronous
-			// User.findOne wont fire unless data is sent back
-			process.nextTick(function() {
+			// find a user whose email is the same as the forms email
+			// we are checking to see if the user trying to login already exists
+			User.findOne({ 'email' :  email }, function(err, user) {
+				// if there are any errors, return the error
+				if (err)
+					return done(err);
 
-				// find a user whose email is the same as the forms email
-				// we are checking to see if the user trying to login already exists
-				User.findOne({ 'email' :  email }, function(err, user) {
-					// if there are any errors, return the error
-					if (err)
-						return done(err);
+				// check to see if there's already a user with that email
+				if (user) {
+					return done(null, false, { error: 'That email is already taken.' });
+				}
 
-					// check to see if theres already a user with that email
-					if (user) {
-						return done(null, false, { error: 'That email is already taken.' });
-					} else {
+				if(!req.body.displayName){
+					return done(null, false, {error: 'No display name supplied'});
+				}
 
-						// if there is no user with that email
-						// create the user
-						var newUser = new User();
+				User.findOne({ 'displayName' :  req.body.displayName }, function(err, user) {
 
-						// set the user's local credentials
-						newUser.email = email;
-						newUser.password_hash = password;
-
-						// save the user
-						newUser.save(function(err) {
-							if (err)
-								throw err;
-							return done(null, newUser);
-						});
+					if(user){
+						return done(null, false, {error: 'Display name is already taken'});
 					}
+					// if there is no user with that email
+					// create the user
+					var newUser = new User();
 
+					// set the user's local credentials
+					newUser.email = email;
+					newUser.password_hash = password;
+					newUser.displayName = req.body.displayName;
+
+					// save the user
+					newUser.save(function(err) {
+						if (err)
+							throw err;
+						return done(null, newUser);
+					});
 				});
-
 			});
-
 		}
 	));
 

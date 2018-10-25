@@ -41,11 +41,11 @@ AuthRouter.post('/register', (req, res, next) => {
 
 AuthRouter.get('/logout', function(req, res) {
 	req.logout();
-	return res.send('OK');
+	return res.status(200).send('OK');
 });
 
 AuthRouter.get('/session/check', passportConfig.loggedInMiddleware, function(req, res){
-	return res.send('OK');
+	return res.status(200).send('OK');
 });
 
 module.exports =  AuthRouter;

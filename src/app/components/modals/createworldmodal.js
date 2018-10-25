@@ -1,42 +1,15 @@
 import {Component} from 'react';
 import {Button, Checkbox, Col, Form, Input, Modal, Row} from "antd";
 import React from "react";
-class CreateWorldForm extends Component {
+class CreateWorldModal extends Component {
 
 	constructor(props){
 		super(props);
 		this.state = {
 			name: null,
 			public: false,
-			error: null
 		}
 	}
-
-	createWorld = () => {
-		this.setState({error: null});
-		this.setState({public: null});
-		this.setState({name: null});
-		fetch(
-			'/api/worlds',
-			{
-				method: 'POST',
-				body: JSON.stringify(this.state),
-				headers: {
-					"Content-Type": "application/json; charset=utf-8",
-				}
-			}
-		).then((response) => {
-			if(response.status !== 200){
-				response.json().then((data) => {
-					this.setState({error: data.error});
-				});
-			} else {
-				response.json().then((data) => {
-					this.props.callback(data);
-				});
-			}
-		})
-	};
 
 	setName = (event) => {
 		this.setState({name: event.target.value});
@@ -48,8 +21,8 @@ class CreateWorldForm extends Component {
 
 	render(){
 		let errorRow = <Row></Row>;
-		if(this.state.error){
-			errorRow = <Row><Col span={24}>{this.state.error}</Col></Row>
+		if(this.props.error){
+			errorRow = <Row><Col span={24}>{this.props.error}</Col></Row>
 		}
 		const formItemLayout = {
 			labelCol: { span: 4 },
@@ -62,7 +35,7 @@ class CreateWorldForm extends Component {
 			<Modal
 				title="Create World"
 				visible={this.props.show}
-				onCancel={() => {this.props.callback()}}
+				onCancel={() => {this.props.showCreateWorldModal(false)}}
 				footer={null}
 			>
 				{errorRow}
@@ -80,7 +53,7 @@ class CreateWorldForm extends Component {
 						</Checkbox>
 					</Form.Item>
 					<Form.Item {...noLabelItem}>
-						<Button type="primary" onClick={this.createWorld}>Submit</Button>
+						<Button type="primary" onClick={() => {this.props.createWorld(this.state.name, this.state.public)}}>Submit</Button>
 					</Form.Item>
 				</Form>
 			</Modal>
@@ -88,4 +61,4 @@ class CreateWorldForm extends Component {
 	}
 }
 
-export default CreateWorldForm;
+export default CreateWorldModal;
