@@ -6,9 +6,9 @@ class RegisterActionFactory {
 	static REGISTER_ERROR = 'REGISTER_ERROR';
 
 	static tryRegister(email, password, display) {
-		return async (dispatch, getState, api) => {
+		return async (dispatch, getState, { apiClient, history}) => {
 			try{
-				await api.register(email, password, display);
+				await apiClient.register(email, password, display);
 				dispatch(LoginActionFactory.resumeSession());
 				dispatch({
 					type: UIActionFactory.SHOW_REGISTRATION_MODAL,

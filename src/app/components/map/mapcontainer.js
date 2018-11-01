@@ -1,31 +1,68 @@
 import React, { Component } from 'react';
 import {withRouter} from "react-router-dom";
 import {connect} from 'react-redux';
-import LoginActionFactory from "../../redux/actions/loginactionfactory";
-import UIActionFactory from "../../redux/actions/uiactionfactory";
-import {Button} from "antd";
+import DefaultViewContainer from "../defaultviewcontainer";
+import {Button, Icon, Row, Upload} from "antd";
+import WikiActionFactory from "../../redux/actions/wikiactionfactory";
+import MapCanvas from "./mapcanvas";
+import MapActionFactory from "../../redux/actions/mapactionfactory";
 
 class Map extends Component {
-	render(){
-		if(this.props.currentWorld){
-			if(!this.props.currentWorld.wikiPage.mapImage){
 
-			}
+	constructor(props){
+		super(props);
+		this.state = {
+			mapToUpload: null
+		};
+	}
+
+	beforeUpload = (file) => {
+		this.setState({
+			mapToUpload: file
+		});
+		return false;
+	};
+
+	upload = () => {
+		this.props.uploadImageFromMap(this.state.mapToUpload);
+	};
+
+	render(){
+		if(!this.props.currentWorld){
+			return (<DefaultViewContainer/>);
 		}
-		let loginPrompt = <div>
-			<Button type='primary' onClick={() => {this.props.showLogin()}}>Login</Button>
-			<div> to create a world</div>
-		</div>;
-		if(this.props.currentUser){
-			loginPrompt = <div><Button type='primary' onClick={() => {this.props.showCreateWorldModal()}}>Create World</Button></div>
+		if(!this.props.currentMap.image){
+			return (
+				<div>
+					<div>
+						Map Image does not exist
+					</div>
+					<Upload
+						action="/api/images"
+						beforeUpload={this.beforeUpload}
+						multiple={false}
+						showUploadList={true}
+						fileList={this.state.mapToUpload ? [this.state.mapToUpload] : []}
+					>
+						<Button>
+							<Icon type="upload" /> Select Map
+						</Button>
+					</Upload>
+					<Button onClick={this.upload}>
+						Upload
+					</Button>
+				</div>
+			);
 		}
+
 		return (
-			<div>
-				<div>No world selected. </div>
-				<Button type='primary' onClick={() => {this.props.showSelectWorldModal()}}>Select World</Button>
-				<div>or</div>
-				{loginPrompt}
-			</div>
+			<MapCanvas
+				chunks={this.props.currentMap.chunks}
+				width={this.state.windowWidth}
+				height={this.state.windowHeight - 47}
+				setCurrentMapPosition={this.props.setCurrentMapPosition}
+				currentMap={this.props.currentMap}
+			/>
 		);
 	}
 }
@@ -34,25 +71,23 @@ const mapStateToProps = state => {
 	return {
 		currentUser: state.currentUser,
 		currentWorld: state.currentWorld,
+		currentMap: state.currentMap
 	}
 };
 
 const mapDispatchToProps = dispatch => {
 	return {
-		showLogin: () => {
-			dispatch(UIActionFactory.showLoginModal())
+		uploadImageFromMap : (file) => {
+			dispatch(WikiActionFactory.uploadImageFromMap(file));
 		},
-		showCreateWorldModal: () => {
-			dispatch(UIActionFactory.showCreateWorldModal())
-		},
-		showSelectWorldModal: () => {
-			dispatch(UIActionFactory.showSelectWorldModal())
+		setCurrentMapPosition: (x, y) => {
+			dispatch(MapActionFactory.setCurrentMapPosition(x, y));
 		}
 	}
 };
  const MapContainer = connect(
 	mapStateToProps,
 	mapDispatchToProps
- )(Map);
+ )(withRouter(Map));
 
-export default withRouter(MapContainer);
+export default MapContainer;

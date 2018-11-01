@@ -42,6 +42,16 @@ class ApiClient {
 		);
 	}
 
+	async isAuthed(){
+		const response = await fetch(
+			'/api/auth/session/check',
+			{
+				method: 'GET'
+			}
+		);
+		return response.status === 200;
+	}
+
 	async register(email, password, displayName) {
 		let response = await fetch(
 			'/api/auth/register',
@@ -95,7 +105,10 @@ class ApiClient {
 			`/api/users/current`,
 			{
 				method: 'PUT',
-				body: JSON.stringify({currentWorld: world._id})
+				body: JSON.stringify({currentWorld: world._id}),
+				headers: {
+					"Content-Type": "application/json; charset=utf-8",
+				}
 			}
 		);
 		return await this.jsonOrError(response);
@@ -116,7 +129,10 @@ class ApiClient {
 			`/api/worlds/${world._id}`,
 			{
 				method: 'PUT',
-				body: JSON.stringify(world)
+				body: JSON.stringify(world),
+				headers: {
+					"Content-Type": "application/json; charset=utf-8",
+				}
 			}
 		);
 		return await this.jsonOrError(response);
@@ -127,7 +143,21 @@ class ApiClient {
 			'/api/wikiPages',
 			{
 				method: 'POST',
-				body: JSON.stringify({name: name, world: worldId}),
+				body: JSON.stringify({name: name, world: worldId, type: type}),
+				headers: {
+					"Content-Type": "application/json; charset=utf-8",
+				}
+			}
+		);
+		return await this.jsonOrError(response);
+	}
+
+	async updateWiki(wiki){
+		let response = await fetch(
+			`/api/wikiPages/${wiki._id}`,
+			{
+				method: 'PUT',
+				body: JSON.stringify(wiki),
 				headers: {
 					"Content-Type": "application/json; charset=utf-8",
 				}
@@ -151,6 +181,59 @@ class ApiClient {
 		}
 		const payload = await response.json();
 		throw new ApiError(payload.error || payload.message);
+	}
+
+	async postImage(file){
+		const formData  = new FormData();
+		formData.append('data', file);
+		let response = await fetch(
+			'/api/images',
+			{
+				method: 'POST',
+				body: formData
+			}
+		);
+		return await this.jsonOrError(response);
+	}
+
+	async getImage(id){
+		let response = await fetch(
+			`/api/images/${id}`,
+			{
+				method: 'GET',
+			}
+		);
+		return await this.jsonOrError(response);
+	}
+
+	async getWiki(id){
+		let response = await fetch(
+			`/api/wikiPages/${id}`,
+			{
+				method: 'GET',
+			}
+		);
+		return await this.jsonOrError(response);
+	}
+
+	async getChunks(imageId){
+		let response = await fetch(
+			`/api/chunks/?imageId=${imageId}`,
+			{
+				method: 'GET',
+			}
+		);
+		return await this.jsonOrError(response);
+	}
+
+	async getChunk(chunkId){
+		let response = await fetch(
+			`/api/chunks/data/${chunkId}`,
+			{
+				method: 'GET',
+			}
+		);
+		return await response.arrayBuffer();
 	}
 }
 

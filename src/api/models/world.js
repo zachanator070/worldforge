@@ -26,6 +26,29 @@ const worldSchema = Schema({
 	}
 });
 
+worldSchema.methods.userCanRead = function (user) {
+	let canRead = this.public;
+	if(user === undefined || user === null){
+		return canRead;
+	}
+	canRead = canRead || user._id.equals(this.owner._id);
+	for(let userId of this.readUsers){
+		canRead = canRead || userId.equals(user._id);
+	}
+	return canRead;
+};
+
+worldSchema.methods.userCanWrite = function (user) {
+	if(user === undefined || user === null){
+		return false;
+	}
+	let canWrite = user._id.equals(this.owner._id);
+	for(let userId of this.writeUsers){
+		canWrite = canWrite || userId.equals(user._id);
+	}
+	return canWrite;
+};
+
 const World = mongoose.model('World', worldSchema);
 
 module.exports = World;

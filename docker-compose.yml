@@ -12,18 +12,25 @@ services:
     ports:
     - "${API_PORT:-3000}:${API_PORT:-3000}"
     - "9229:9229"
-    command: "npm run start-dev"
+    command: "npm run start"
     depends_on:
       - mongodb
     networks:
-      - rptools
+      - worldforge
 
   mongodb:
     image: "mongo:latest"
     ports:
       - "27017:27017"
     networks:
-    - rptools
+    - worldforge
+
+  redis:
+    image: "redis:latest"
+    ports:
+    - "6379:6379"
+    networks:
+    - worldforge
 
 networks:
-  rptools:
+  worldforge:

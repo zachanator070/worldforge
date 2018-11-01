@@ -1,36 +1,50 @@
 import UIActionFactory from "./uiactionfactory";
 import LoginActionFactory from "./loginactionfactory";
 import ApiClient from "../../apiclient";
+import ApiError from "../../exceptions";
+import MapActionFactory from "./mapactionfactory";
 
 class WorldActionFactory {
 
-	static SELECT_WORLD = 'SELECT_WORLD';
-	static AVAILABLE_WORLDS_SUCCESS = 'AVAILABLE_WORLDS_SUCCESS';
+	static SET_CURRENT_WORLD = 'SET_CURRENT_WORLD';
+	static SET_AVAILABLE_WORLDS = 'SET_AVAILABLE_WORLDS';
 	static AVAILABLE_WORLDS_ERROR = 'AVAILABLE_WORLDS_ERROR';
 	static CREATE_WORLDS_ERROR = 'CREATE_WORLDS_ERROR';
 	static SET_DISPLAY_WORLD = 'SET_DISPLAY_WORLD';
 
-	static selectWorld(world){
-		return async (dispatch, getState, api) => {
-			dispatch(
-				{
-					type: WorldActionFactory.SELECT_WORLD,
-					currentWorld: world
-				}
-			);
-			if(getState().currentUser && world && getState().currentUser.currentWorld !== world._id){
-				const newUser = await api.setCurrentWorld(world);
-				dispatch(LoginActionFactory.createLoginSuccessAction(newUser));
+	static findAndSetCurrentWorld(worldId){
+		return async (dispatch, getState, { apiClient, history}) => {
+			let world = null;
+			if(worldId !== null){
+				world = await apiClient.getWorld(worldId).catch((error) => {
+					dispatch(UIActionFactory.gotoPage('/ui', {}));
+					return null;
+				});
 			}
-			dispatch(UIActionFactory.showSelectWorldModal(false));
+
+			dispatch(WorldActionFactory.setCurrentWorld(world));
+
 		}
 	}
 
+	static setCurrentWorld(world) {
+		return async (dispatch, getState, {apiClient, history}) => {
+			dispatch({
+				type: WorldActionFactory.SET_CURRENT_WORLD,
+				currentWorld: world
+			});
+			if(world && world.wikiPage.mapImage){
+				dispatch(MapActionFactory.getAndSetMap(world.wikiPage.mapImage._id));
+			}
+			dispatch(UIActionFactory.redirectAfterWorldChange());
+		};
+	}
+
 	static fetchAvailableWorlds(){
-		return async (dispatch, getState, api) => {
+		return async (dispatch, getState, { apiClient, history}) => {
 			try{
-				let worlds = await api.fetchAvailableWorlds();
-				dispatch(WorldActionFactory.fetchWorldsSuccess(worlds));
+				let worlds = await apiClient.fetchAvailableWorlds();
+				dispatch(WorldActionFactory.setAvailableWorlds(worlds));
 			} catch (error){
 				dispatch(WorldActionFactory.fetchWorldsError(error.message))
 			}
@@ -45,30 +59,22 @@ class WorldActionFactory {
 		}
 	}
 
-	static fetchWorldsSuccess(worlds){
-		return (dispatch, getState, api) => {
+	static setAvailableWorlds(worlds){
+		return (dispatch, getState, { apiClient, history}) => {
 			dispatch({
-				type: WorldActionFactory.AVAILABLE_WORLDS_SUCCESS,
+				type: WorldActionFactory.SET_AVAILABLE_WORLDS,
 				availableWorlds: worlds
 			});
-			let canViewCurrentWorld = false;
-			for (let world of getState().availableWorlds){
-				if(world._id === getState().currentWorld._id && world.owner._id === getState().currentWorld.owner._id){
-					canViewCurrentWorld = true;
-				}
-			}
-			if(!canViewCurrentWorld){
-				dispatch(WorldActionFactory.selectWorld(null));
-			}
 		}
 	}
 
 	static createWorld(name, isPublic){
-		return async (dispatch, getState, api) => {
+		return async (dispatch, getState, { apiClient, history}) => {
 			try{
-				const world = await api.createWorld(name, isPublic);
-				const wikiPage = await api.createWikiPage(name, world._id, ApiClient.WIKI_PLACE);
-
+				let world = await apiClient.createWorld(name, isPublic);
+				const wikiPage = await apiClient.createWikiPage(name, world._id, ApiClient.WIKI_PLACE);
+				world.wikiPage = wikiPage._id;
+				await apiClient.updateWorld(world);
 				dispatch(this.fetchAvailableWorlds());
 				dispatch(UIActionFactory.showCreateWorldModal(false))
 			} catch (error) {
@@ -85,7 +91,7 @@ class WorldActionFactory {
 	}
 
 	static displayWorld(world){
-		return async (dispatch, getState, api) => {
+		return async (dispatch, getState, { apiClient, history}) => {
 			dispatch({
 				type: WorldActionFactory.SET_DISPLAY_WORLD,
 				displayWorld: world

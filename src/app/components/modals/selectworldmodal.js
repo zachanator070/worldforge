@@ -51,8 +51,7 @@ class SelectWorldModal extends Component {
 					<Button
 						type={'primary'}
 						onClick={() => {
-							this.props.selectWorld(this.props.displayWorld);
-							this.props.showSelectWorldModal(false)
+							this.props.submitSelectWorldModal(this.props.displayWorld._id);
 						}}
 						disabled={this.props.displayWorld === null}
 					>

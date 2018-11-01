@@ -4,12 +4,9 @@ let WikiPageRouter = express.Router();
 const WikiPage = require('../../models/wikipage.js');
 const passportConfig = require('../../passport');
 
-WikiPageRouter.get('/', (req, res, next) => {
+WikiPageRouter.get('/:id', (req, res, next) => {
 
-	if(!req.query.id){
-		return res.status(500).json({error: 'No wiki page id specified'});
-	}
-	WikiPage.find({_id: req.query.id})
+	WikiPage.findOne({_id: req.params.id})
 		.populate({
 			path: 'world coverImage mapImage',
 			populate: {path: 'owner'}
@@ -17,12 +14,10 @@ WikiPageRouter.get('/', (req, res, next) => {
 			if(err){
 				return res.status(500).json({error: err})
 			}
-
-			let allowed = page.world.public;
-			if(!allowed && req.user && (page.world.owner._id === req.user._id || page.world.readUsers.includes(req.user._id))){
-				allowed = true;
+			if(!page){
+				return res.status(404).send();
 			}
-			if(!allowed){
+			if(!page.world.userCanRead(req.user)){
 				return res.status(403).json({error: 'Unauthorized'});
 			}
 			return res.json(page);
@@ -30,7 +25,30 @@ WikiPageRouter.get('/', (req, res, next) => {
 
 });
 
-WikiPageRouter.post('/', passportConfig.loggedInMiddleware , (req, res, next) => {
+WikiPageRouter.put('/:id', passportConfig.loggedInMiddleware, (req, res, next) => {
+
+	WikiPage.findOne({_id: req.params.id})
+		.populate({
+			path: 'world coverImage mapImage',
+			populate: {path: 'owner'}
+		}).exec((err, page) => {
+			if(err){
+				return res.status(500).json({error: err})
+			}
+			if(!page.world.userCanWrite(req.user)){
+				return res.status(403).json({error: 'Unauthorized'});
+			}
+
+			// TODO: need to figure out what to do when a new image is set on the page, need image cleanup logic
+
+			WikiPage.findOneAndUpdate({_id: req.params.id}, { $set: req.body}).exec((err, page) => {
+				res.redirect(303, `/api/wikiPages/${page._id}`);
+			});
+		});
+
+});
+
+WikiPageRouter.post('/', passportConfig.loggedInMiddleware, (req, res, next) => {
 
 	WikiPage.create(req.body, function(err, createdWorld){
 		if(err){

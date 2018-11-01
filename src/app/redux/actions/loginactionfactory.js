@@ -3,18 +3,18 @@ import UIActionFactory from "./uiactionfactory";
 
 class LoginActionFactory{
 
-	static LOGIN_SUCCESS = 'LOGIN_SUCCESS';
+	static SET_CURRENT_USER = 'SET_CURRENT_USER';
 	static LOGIN_ERROR = 'LOGIN_ERROR';
 
-	static LOGOUT_SUCCESS = 'LOGOUT_SUCCESS';
 	static LOGOUT_ERROR = 'LOGOUT_ERROR';
 
 	static tryLogin(username, password) {
-		return async (dispatch, getState, apiClient) => {
+		return async (dispatch, getState, { apiClient, history}) => {
 			try{
 				await apiClient.login(username, password);
 				let user = await apiClient.getCurrentUser();
-				dispatch(this.createLoginSuccessAction(user));
+				dispatch(this.loginSuccess(user));
+
 			} catch (error){
 				dispatch(this.createLoginErrorAction(error.message))
 			}
@@ -22,13 +22,18 @@ class LoginActionFactory{
 	}
 
 	static resumeSession() {
-		return async (dispatch, getState, apiClient) => {
-			try{
+		return async (dispatch, getState, { apiClient, history}) => {
+			const authed = await apiClient.isAuthed();
+			if(authed){
 				let user = await apiClient.getCurrentUser();
-				dispatch(this.createLoginSuccessAction(user));
-			} catch(error){
-
+				dispatch(LoginActionFactory.loginSuccess(user));
 			}
+			else {
+				dispatch(WorldActionFactory.fetchAvailableWorlds());
+			}
+
+			dispatch(UIActionFactory.applyUrlQueryArgs());
+
 		}
 	}
 
@@ -39,26 +44,43 @@ class LoginActionFactory{
 		};
 	}
 
-	static createLoginSuccessAction(user) {
-		return async (dispatch, getState, api) => {
-			dispatch({
-				type: LoginActionFactory.LOGIN_SUCCESS,
-				user: user
-			});
+	static setCurrentUser(user){
+		return {
+			type: LoginActionFactory.SET_CURRENT_USER,
+			user: user
+		}
+	}
+
+	static loginSuccess(user) {
+		return async (dispatch, getState, { apiClient, history}) => {
+			dispatch(LoginActionFactory.setCurrentUser(user));
+
 			dispatch(UIActionFactory.showLoginModal(false));
-			let world = getState().currentWorld;
-			if(getState().currentWorld){
-				world = await api.getWorld(user.currentWorld);
-			}
-			if(world === null || world._id !== user.currentWorld){
-				dispatch(WorldActionFactory.selectWorld(world));
-			}
+
 			dispatch(WorldActionFactory.fetchAvailableWorlds());
+
+			dispatch(LoginActionFactory.loadLastSelectedWorld());
+		}
+	}
+
+	static loadLastSelectedWorld(){
+		return async (dispatch, getState, {apiClient, history}) => {
+			let loadUserWorld = false;
+
+			if(getState().currentWorld === null && getState().currentUser.currentWorld){
+				loadUserWorld = true;
+			}
+			else if(getState().currentUser.currentWorld && getState().currentUser.currentWorld._id !== getState().currentWorld){
+				loadUserWorld = true;
+			}
+			if(loadUserWorld){
+				dispatch(WorldActionFactory.findAndSetCurrentWorld(getState().currentUser.currentWorld));
+			}
 		}
 	}
 
 	static tryLogout(){
-		return async (dispatch, getState, apiClient) => {
+		return async (dispatch, getState, { apiClient, history}) => {
 			try{
 				await apiClient.logout();
 				dispatch(this.createLogoutSuccessAction());
@@ -71,7 +93,8 @@ class LoginActionFactory{
 
 	static createLogoutSuccessAction() {
 		return {
-			type: LoginActionFactory.LOGOUT_SUCCESS
+			type: LoginActionFactory.SET_CURRENT_USER,
+			user: null
 		}
 	}
 

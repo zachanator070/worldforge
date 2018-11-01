@@ -31,7 +31,7 @@ class Modals extends Component {
 				<SelectWorldModal
 					show={this.props.ui.showSelectWorldModal}
 					showSelectWorldModal={this.props.showSelectWorldModal}
-					selectWorld={this.props.selectWorld}
+					submitSelectWorldModal={this.props.submitSelectWorldModal}
 					availableWorlds={this.props.availableWorlds}
 					displayWorld={this.props.displayWorld}
 					setDisplayWorld={this.props.setDisplayWorld}
@@ -78,8 +78,8 @@ const mapDispatchToProps = dispatch => {
 		showSelectWorldModal: (show) => {
 			dispatch(UIActionFactory.showSelectWorldModal(show));
 		},
-		selectWorld: (world) => {
-			dispatch(WorldActionFactory.selectWorld(world));
+		submitSelectWorldModal: (world) => {
+			dispatch(UIActionFactory.submitSelectWorldModal(world));
 		},
 		createWorld: (name, isPublic) => {
 			dispatch(WorldActionFactory.createWorld(name, isPublic));
