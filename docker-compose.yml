@@ -12,7 +12,7 @@ services:
     ports:
     - "${API_PORT:-3000}:${API_PORT:-3000}"
     - "9229:9229"
-    command: "npm run start"
+    command: "npm run start-dev"
     depends_on:
       - mongodb
     networks:

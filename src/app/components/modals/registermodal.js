@@ -44,8 +44,8 @@ class RegisterModal extends Component {
 
 	render() {
 		let errorBox = <div></div>;
-		if(this.state.error){
-			errorBox = <div>{this.state.error}</div>;
+		if(this.props.error){
+			errorBox = <div>{this.props.error}</div>;
 		}
 		return (
 			<div>
@@ -55,7 +55,7 @@ class RegisterModal extends Component {
 					centered
 					onCancel={this.props.cancel}
 					footer={[
-						<Button type='primary' onClick={() => {this.props.register(this.state.email, this.state.password, this.state.displayName)}}>Register</Button>
+						<Button type='primary' key='register' onClick={() => {this.props.register(this.state.email, this.state.password, this.state.displayName)}}>Register</Button>
 					]}
 				>
 					{errorBox}

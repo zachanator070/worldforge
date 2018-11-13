@@ -18,7 +18,7 @@ ChunkRouter.get('/data/:id', (req, res, next) => {
 		const gfs = Grid(mongoose.connection.db, mongoose.mongo);
 		gfs.files.findOne({_id: mongoose.Types.ObjectId(chunk.fileId)}, (err, file) => {
 			const readstream = gfs.createReadStream({
-				filename: file.filename
+				_id: file._id
 			});
 			res.set('Content-Type', file.contentType);
 			return readstream.pipe(res);

@@ -26,13 +26,14 @@ class LoginActionFactory{
 			const authed = await apiClient.isAuthed();
 			if(authed){
 				let user = await apiClient.getCurrentUser();
-				dispatch(LoginActionFactory.loginSuccess(user));
-			}
-			else {
-				dispatch(WorldActionFactory.fetchAvailableWorlds());
+				dispatch(LoginActionFactory.setCurrentUser(user));
 			}
 
-			dispatch(UIActionFactory.applyUrlQueryArgs());
+			await dispatch(WorldActionFactory.fetchAvailableWorlds());
+
+			await dispatch(UIActionFactory.applyUrlQueryArgs());
+
+			await dispatch(LoginActionFactory.loadLastSelectedWorld());
 
 		}
 	}
@@ -57,24 +58,17 @@ class LoginActionFactory{
 
 			dispatch(UIActionFactory.showLoginModal(false));
 
-			dispatch(WorldActionFactory.fetchAvailableWorlds());
+			await dispatch(WorldActionFactory.fetchAvailableWorlds());
 
-			dispatch(LoginActionFactory.loadLastSelectedWorld());
+			await dispatch(LoginActionFactory.loadLastSelectedWorld());
+
 		}
 	}
 
 	static loadLastSelectedWorld(){
 		return async (dispatch, getState, {apiClient, history}) => {
-			let loadUserWorld = false;
-
-			if(getState().currentWorld === null && getState().currentUser.currentWorld){
-				loadUserWorld = true;
-			}
-			else if(getState().currentUser.currentWorld && getState().currentUser.currentWorld._id !== getState().currentWorld){
-				loadUserWorld = true;
-			}
-			if(loadUserWorld){
-				dispatch(WorldActionFactory.findAndSetCurrentWorld(getState().currentUser.currentWorld));
+			if(getState().currentWorld === null && getState().currentUser && getState().currentUser.currentWorld){
+				dispatch(UIActionFactory.gotoPage('/ui/map', {world: getState().currentUser.currentWorld}, true));
 			}
 		}
 	}

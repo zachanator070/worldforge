@@ -1,15 +1,19 @@
 
 const express = require('express');
 let WikiPageRouter = express.Router();
-const WikiPage = require('../../models/wikipage.js');
+const WikiPage = require('../../models/wikipage');
 const passportConfig = require('../../passport');
+const World = require('../../models/world');
 
 WikiPageRouter.get('/:id', (req, res, next) => {
 
 	WikiPage.findOne({_id: req.params.id})
 		.populate({
 			path: 'world coverImage mapImage',
-			populate: {path: 'owner'}
+			populate: {
+				path: 'owner icon chunks',
+				populate: {path: 'chunks'}
+			}
 		}).exec((err, page) => {
 			if(err){
 				return res.status(500).json({error: err})
@@ -22,6 +26,40 @@ WikiPageRouter.get('/:id', (req, res, next) => {
 			}
 			return res.json(page);
 	});
+
+});
+
+WikiPageRouter.get('/', (req, res, next) => {
+
+	if(!req.query.world){
+		return res.status(400).json({error: 'Need world id parameter'});
+	}
+
+	World.findOne({_id: req.query.world}, (err, world) => {
+		if(err){
+			return res.status(500).json({error: err})
+		}
+
+		if(!world.userCanRead(req.user)){
+			return res.status(403).json({error: 'Unauthorized'});
+		}
+
+		const params = {
+			world: req.query.world
+		};
+		if(req.query.name){
+			params.name = { $regex: '^' + req.query.name + '.*' , $options: 'i'}
+		}
+
+		WikiPage.find(params, (err, pages) => {
+			if(err){
+				return res.status(500).json({error: err})
+			}
+			return res.json(pages);
+		});
+	});
+
+
 
 });
 
@@ -42,7 +80,10 @@ WikiPageRouter.put('/:id', passportConfig.loggedInMiddleware, (req, res, next) =
 			// TODO: need to figure out what to do when a new image is set on the page, need image cleanup logic
 
 			WikiPage.findOneAndUpdate({_id: req.params.id}, { $set: req.body}).exec((err, page) => {
-				res.redirect(303, `/api/wikiPages/${page._id}`);
+				if(err){
+					return res.status(500).json({error: err})
+				}
+				return res.redirect(303, `/api/wikiPages/${page._id}`);
 			});
 		});
 

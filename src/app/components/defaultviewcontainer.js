@@ -7,16 +7,16 @@ class DefaultView extends Component {
 	render(){
 		let loginPrompt = <div>
 			<Button type='primary' onClick={() => {this.props.showLogin()}}>Login</Button>
-			<div> to create a world</div>
+			<div className='padding-lg'> to create a world</div>
 		</div>;
 		if(this.props.currentUser){
-			loginPrompt = <div><Button type='primary' onClick={() => {this.props.showCreateWorldModal()}}>Create World</Button></div>
+			loginPrompt = <div className='padding-lg'><Button type='primary' onClick={() => {this.props.showCreateWorldModal()}}>Create World</Button></div>
 		}
 		return (
-			<div>
-				<div>No world selected. </div>
+			<div className='text-align-center'>
+				<div className='padding-lg'>No world selected.</div>
 				<Button type='primary' onClick={() => {this.props.showSelectWorldModal()}}>Select World</Button>
-				<div>or</div>
+				<div className='padding-lg'>or</div>
 				{loginPrompt}
 			</div>
 		);

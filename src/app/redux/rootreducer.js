@@ -59,7 +59,7 @@ class RootReducer {
 				if(action.user === null && !state.public ){
 					return null;
 				}
-				else if (action.user && (state.owner._id !== action.user._id || !state.readUsers.includes(action.user._id))){
+				else if (action.user && (state.owner._id !== action.user._id && !state.readUsers.includes(action.user._id))){
 					return null;
 				}
 				return state;
@@ -108,7 +108,8 @@ class RootReducer {
 		showRegisterModal: false,
 		showSelectWorldModal: false,
 		showCreateWorldModal: false,
-		showWorldPermissionModal: false
+		showWorldPermissionModal: false,
+		showDrawer: false
 	}, action){
 		switch(action.type){
 			case UIActionFactory.SHOW_LOGIN_MODAL:
@@ -131,6 +132,10 @@ class RootReducer {
 				return Object.assign({}, state, {
 					showCreateWorldModal: action.show
 				});
+			case UIActionFactory.SHOW_DRAWER:
+				return Object.assign({}, state, {
+					showDrawer: action.show
+				});
 			default:
 				return state;
 		}
@@ -149,7 +154,7 @@ class RootReducer {
 		image: null,
 		chunks: [],
 		x: 0,
-		y: 42,
+		y: 0,
 		zoom: 1
 	}, action){
 		switch (action.type) {
@@ -184,13 +189,33 @@ class RootReducer {
 		}
 	}
 
+	wikiSearchResultsReducer(state = [], action){
+		switch (action.type) {
+			case WikiActionFactory.SET_WIKI_SEARCH_RESULTS:
+				return action.results;
+			default:
+				return state;
+		}
+	}
+
+	displayWikiReducer(state = null, action){
+		switch (action.type) {
+			case WikiActionFactory.SET_DISPLAY_WIKI:
+				return action.wiki;
+			default:
+				return state;
+		}
+	}
+
 	getCombinedReducers() {
 		return this.combineReducers({
 			currentUser: this.currentUserReducer,
 			currentWorld: this.currentWorldReducer,
 			currentMap: this.currentMapReducer,
 			currentWiki: this.currentWikiReducer,
+			wikiSearchResults: this.wikiSearchResultsReducer,
 			ui: this.uiReducer,
+			displayWiki: this.displayWikiReducer,
 			displayWorld: this.displayWorldReducer,
 			availableWorlds: this.availableWorldsReducer,
 			loginRequest: this.loggedInReducer,

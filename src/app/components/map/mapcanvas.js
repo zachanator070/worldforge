@@ -1,12 +1,11 @@
 import React, {Component} from 'react';
+import * as mathjs from 'mathjs';
 
 class MapCanvas extends Component {
 
 	constructor(props){
 		super(props);
 		this.state = {
-			windowWidth: 0,
-			windowHeight: 0,
 			lastMouseX: null,
 			lastMouseY: null
 		};
@@ -16,7 +15,6 @@ class MapCanvas extends Component {
 		if(this.state.lastMouseX && this.state.lastMouseY){
 			const newX = this.props.currentMap.x + (evt.clientX - this.state.lastMouseX);
 			const newY = this.props.currentMap.y + (evt.clientY - this.state.lastMouseY);
-			console.log(newX + ', ' + newY);
 			this.props.setCurrentMapPosition(newX, newY);
 		}
 		this.setState({
@@ -26,9 +24,6 @@ class MapCanvas extends Component {
 	};
 
 	componentDidMount(){
-		// this.drawChunks();
-		this.updateWindowDimensions();
-		window.addEventListener('resize', this.updateWindowDimensions);
 		const canvas = this.refs.canvas;
 		canvas.addEventListener('mousedown', (mousedownEvent) => {
 			canvas.addEventListener('mousemove', this.updateMapPosition, false);
@@ -42,70 +37,91 @@ class MapCanvas extends Component {
 		}, false);
 	}
 
-	componentWillUnmount() {
-		window.removeEventListener('resize', this.updateWindowDimensions);
-	}
-
-	updateWindowDimensions = () => {
-		this.setState({ windowWidth: window.innerWidth, windowHeight: window.innerHeight });
-	};
-
-	componentDidUpdate(){
-	}
-
-	drawChunks = () => {
-		let context = this.refs.canvas.getContext('2d');
-		for (let chunk of this.props.chunks){
-			const part = new Image();
-			part.onload = () => {
-				const xOffset = this.props.currentMap.x * this.props.currentMap.zoom;
-				const yOffset = this.props.currentMap.y * this.props.currentMap.zoom;
-				context.drawImage(
-					part,
-					chunk.x * 250 * this.props.currentMap.zoom + xOffset,
-					chunk.y * 250 * this.props.currentMap.zoom + yOffset,
-					chunk.width * this.props.currentMap.zoom,
-					chunk.height * this.props.currentMap.zoom
-				);
-			};
-			part.src = `/api/chunks/data/${chunk._id}`;
-		}
-	};
-
 	clip = (x, y, width, height) => {
-		let clip = x > this.state.windowWidth;
+		let clip = x > this.props.width;
 		clip = clip || x + width < 0;
-		clip = clip || y > this.state.windowHeight;
-		clip = clip || y + height < 42;
+		clip = clip || y > this.props.height;
+		clip = clip || y + height < 0;
 		return clip;
+	};
+
+	handleWheelEvent = (event) => {
+		let zoomRate = .1;
+		if(event.deltaY > 0){
+			zoomRate *= -1;
+		}
+		const newZoom = this.props.currentMap.zoom + zoomRate;
+		this.props.setCurrentMapZoom(newZoom);
+
+		let deltaX = this.props.currentMap.image.width * zoomRate / 2;
+		let deltaY = this.props.currentMap.image.height * zoomRate / 2;
+
+		this.props.setCurrentMapPosition(
+			this.props.currentMap.x - deltaX,
+			this.props.currentMap.y - deltaY,
+		);
+
+	};
+
+	getCameraCoords = (x, y) => {
+
+		const worldCordinates = mathjs.matrix([[x], [y], [0], [1]]);
+		const distance = 100 * this.props.currentMap.zoom;
+
+		// world coordinates * view = camera coordinates
+		const viewMatrix = mathjs.matrix([
+			[1, 0, 0, -this.props.currentMap.x],
+			[0, 1, 0, -this.props.currentMap.y],
+			[0, 0, 1, -distance],
+			[0, 0, 0, 1],
+		]);
+
+		const left = 0 - this.props.width/2;
+		const right = this.props.width/2;
+		const top =  this.props.height/2;
+		const bottom = 0 - this.props.height/2;
+		const near = 0;
+		const far = 0 - distance;
+
+		const projectionMatrix = mathjs.matrix([
+			[2/(right - left), 0 ,0 , -(right + left)/(right - left)],
+			[0, 2/(top - bottom) , 0 , -(top + bottom)/(top - bottom)],
+			[0, 0,  -2/(far - near), -(far + near)/(far - near)],
+			[0, 0, 0, 1]
+		]);
+
+		return mathjs.multiply(projectionMatrix, mathjs.multiply(viewMatrix, worldCordinates));
 	};
 
 	render(){
 		const images = [];
-		const xOffset = this.props.currentMap.x * this.props.currentMap.zoom;
-		const yOffset = this.props.currentMap.y * this.props.currentMap.zoom;
+
 		for (let chunk of this.props.chunks){
 
-			const x = chunk.x * 250 * this.props.currentMap.zoom + xOffset;
-			const y = chunk.y * 250 * this.props.currentMap.zoom + yOffset;
+			const x = chunk.x * 250 * this.props.currentMap.zoom + this.props.currentMap.x;
+			const y = chunk.y * 250 * this.props.currentMap.zoom + this.props.currentMap.y;
 
 			const width = chunk.width * this.props.currentMap.zoom;
 			const height = chunk.height * this.props.currentMap.zoom;
 
-			if(!this.clip(x, y, width, height)){
-				images.push(
-					<img
-						src={`/api/chunks/data/${chunk._id}`}
-						style={{position: 'absolute', left: x, top: y, width: width, height: height}}
-						draggable="false"
-						className='map-tile'
-					/>
-				);
-			}
+			// const cameraCoordinates = this.getCameraCoords(chunk.x * 250, chunk.y * 250);
+
+			// const x = cameraCoordinates.subset(mathjs.index(0,0)) * this.props.width;
+			// const y = cameraCoordinates.subset(mathjs.index(1,0)) * this.props.height;
+
+			images.push(
+				<img
+					key={chunk._id}
+					src={`/api/chunks/data/${chunk._id}`}
+					style={{position: 'absolute', left: x, top: y, width: width, height: height}}
+					draggable="false"
+					className='map-tile'
+				/>
+			);
 
 		}
 		return (
-			<div ref='canvas' className='margin-none' style={{width: this.state.windowWidth, height: this.state.windowHeight - 50}}>
+			<div ref='canvas' className='margin-none overflow-hidden' style={{width: this.props.width, height: this.props.height}} onWheel={this.handleWheelEvent}>
 				{images}
 			</div>
 		);

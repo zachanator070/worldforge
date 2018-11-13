@@ -9,11 +9,17 @@ import {createStore,applyMiddleware, combineReducers} from "redux";
 import thunk from 'redux-thunk';
 import ApiClient from "./apiclient";
 import { createBrowserHistory } from 'history';
+import { composeWithDevTools } from 'redux-devtools-extension';
 
 const apiClient = new ApiClient();
 const rootReducer = new RootReducer(combineReducers);
 const history = createBrowserHistory();
-const store = createStore(rootReducer.getCombinedReducers(), applyMiddleware(thunk.withExtraArgument({ apiClient, history})));
+const store = createStore(
+	rootReducer.getCombinedReducers(),
+	composeWithDevTools(
+		applyMiddleware(thunk.withExtraArgument({ apiClient, history}))
+	)
+);
 
 const app = (
 	<Provider store={store}>

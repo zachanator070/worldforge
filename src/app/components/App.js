@@ -23,12 +23,12 @@ class App extends Component {
 
 	wrapHeader(content) {
 		const header = [
-			<ModalsContainer/>,
-			<NavbarContainer/>
+			<ModalsContainer key={'modals'}/>,
+			<NavbarContainer key={'nav'}/>
 		];
 
 		return (
-			<div>
+			<div className='height-100'>
 				{header}
 				{content}
 			</div>
@@ -38,8 +38,6 @@ class App extends Component {
 	render() {
 
 		return (
-
-			<div>
 				<Router history={this.props.history}>
 					<Switch>
 						<Route path="/ui/wiki" render={() => {return this.wrapHeader(<WikiContainer/>)}}/>
@@ -47,7 +45,6 @@ class App extends Component {
 						<Route path="/" render={() => {return this.wrapHeader(<DefaultViewContainer/>)}}/>
 					</Switch>
 				</Router>
-			</div>
 		);
 	}
 }

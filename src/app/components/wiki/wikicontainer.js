@@ -2,25 +2,47 @@ import React, {Component} from 'react';
 import LoginActionFactory from "../../redux/actions/loginactionfactory";
 import UIActionFactory from "../../redux/actions/uiactionfactory";
 import connect from "react-redux/es/connect/connect";
-import {withRouter} from "react-router-dom";
-import Quill from 'quill';
-import {Button, Col, Row} from "antd";
+import {Router, withRouter} from "react-router-dom";
+import {Button, Col, Divider, Row} from "antd";
+import FolderView from "./folderview";
+import DefaultViewContainer from "../defaultviewcontainer";
+import WikiView from "./wikiview";
+import WikiEdit from "./wikiedit";
+import {Route, Switch} from "react-router";
+import WikiActionFactory from "../../redux/actions/wikiactionfactory";
 
 class Wiki extends Component{
 
-	componentDidMount(){
-		console.log('wiki mounted');
-	}
-
 	render(){
+
+		if(!this.props.currentWorld){
+			return (
+				<DefaultViewContainer/>
+			);
+		}
 
 		return(
 			<Row>
-				<Col span={4}>
-					<Button onClick={this.props.showCreateWikiModal}>New Page</Button>
+				<Col span={4} className='padding-md'>
+					<FolderView
+						currentWorld={this.props.currentWorld}
+						currentWiki={this.props.currentWiki}
+						gotoPage={this.props.gotoPage}
+						updateFolder={this.props.updateFolder}
+						createFolder={this.props.createFolder}
+						deleteFolder={this.props.deleteFolder}
+						createWiki={this.props.createWikiPage}
+					/>
 				</Col>
-				<Col span={20}>
-					<div id='editor'></div>
+				<Col span={16}>
+					<Router history={this.props.history}>
+						<Switch>
+							<Route path='/ui/wiki/edit' render={() => {return (<WikiEdit gotoPage={this.props.gotoPage} currentWiki={this.props.currentWiki} saveWiki={this.props.saveWiki}/>);}}/>
+							<Route path='/ui/wiki/view' render={() => {return (<WikiView gotoPage={this.props.gotoPage} currentWiki={this.props.currentWiki} currentWorld={this.props.currentWorld}/>);}}/>
+						</Switch>
+					</Router>
+				</Col>
+				<Col span={4} className='padding-md'>
 				</Col>
 			</Row>
 		);
@@ -29,11 +51,31 @@ class Wiki extends Component{
 
 const mapStateToProps = state => {
 	return {
+		currentWorld: state.currentWorld,
+		currentWiki: state.currentWiki
 	}
 };
 
 const mapDispatchToProps = dispatch => {
 	return {
+		gotoPage: (path, params = null, override=false) => {
+			dispatch(UIActionFactory.gotoPage(path, params, override));
+		},
+		saveWiki: (name, type, coverToUpload, mapToUpload, content) => {
+			dispatch(WikiActionFactory.saveWiki(name, type, coverToUpload, mapToUpload, content));
+		},
+		createWikiPage: (name, type, folder) => {
+			dispatch(WikiActionFactory.createWiki(name, type, folder));
+		},
+		updateFolder: (folder) => {
+			dispatch(WikiActionFactory.updateFolder(folder));
+		},
+		createFolder: (folder, parent) => {
+			dispatch(WikiActionFactory.createFolder(folder, parent));
+		},
+		delete: (folder) => {
+			dispatch(WikiActionFactory.deleteFolder(folder));
+		},
 	}
 };
 

@@ -63,7 +63,7 @@ class ApiClient {
 				},
 			}
 		);
-		return await this.jsonOrError(response);
+		return response.status === 200;
 	}
 
 	async fetchAvailableWorlds() {
@@ -166,6 +166,44 @@ class ApiClient {
 		return await this.jsonOrError(response);
 	}
 
+	async updateFolder(folder){
+		let response = await fetch(
+			`/api/wikiFolders/${folder._id}`,
+			{
+				method: 'PUT',
+				body: JSON.stringify(folder),
+				headers: {
+					"Content-Type": "application/json; charset=utf-8",
+				}
+			}
+		);
+		return await this.jsonOrError(response);
+	}
+
+	async createFolder(folder){
+		let response = await fetch(
+			`/api/wikiFolders`,
+			{
+				method: 'POST',
+				body: JSON.stringify(folder),
+				headers: {
+					"Content-Type": "application/json; charset=utf-8",
+				}
+			}
+		);
+		return await this.jsonOrError(response);
+	}
+
+	async deleteFolder(folder){
+		let response = await fetch(
+			`/api/wikiFolders${folder._id}`,
+			{
+				method: 'DELETE',
+			}
+		);
+		return response.status === 200;
+	}
+
 	async jsonOrError(response){
 		const payload = await response.json();
 
@@ -183,9 +221,10 @@ class ApiClient {
 		throw new ApiError(payload.error || payload.message);
 	}
 
-	async postImage(file){
+	async postImage(file, chunk = true){
 		const formData  = new FormData();
 		formData.append('data', file);
+		formData.append('chunkImage', chunk);
 		let response = await fetch(
 			'/api/images',
 			{
@@ -234,6 +273,65 @@ class ApiClient {
 			}
 		);
 		return await response.arrayBuffer();
+	}
+
+	async searchWikis(params){
+		const url = '/api/wikiPages?' + Object.entries(params).map(pair => pair[0] + '=' + pair[1]).join('&');
+		let response = await fetch(
+			url,
+			{
+				method: 'GET',
+			}
+		);
+		return await this.jsonOrError(response);
+	}
+
+	async getPins(){
+		let response = await fetch(
+			`/api/pins`,
+			{
+				method: 'GET',
+			}
+		);
+		return await response.jsonOrError(response);
+	}
+
+	async updatePin(pin){
+		let response = await fetch(
+			`/api/pins/${pin._id}`,
+			{
+				method: 'PUT',
+				body: JSON.stringify(pin),
+				headers: {
+					"Content-Type": "application/json; charset=utf-8",
+				}
+			}
+		);
+		return await this.jsonOrError(response);
+	}
+
+	async createPin(pin){
+		let response = await fetch(
+			`/api/pins`,
+			{
+				method: 'POST',
+				body: JSON.stringify(pin),
+				headers: {
+					"Content-Type": "application/json; charset=utf-8",
+				}
+			}
+		);
+		return await this.jsonOrError(response);
+	}
+
+	async deletePin(pin){
+		let response = await fetch(
+			`/api/pins${pin._id}`,
+			{
+				method: 'DELETE',
+			}
+		);
+		return response.status === 200;
 	}
 }
 

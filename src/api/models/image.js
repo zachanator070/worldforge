@@ -23,7 +23,16 @@ const imageSchema = Schema({
 	chunkHeight: {
 		type: Number,
 		required: [true, 'chunkHeight required']
-	}
+	},
+	chunks: [{
+		type: mongoose.Schema.ObjectId,
+		ref: 'Chunk'
+	}],
+	icon: {
+		type: mongoose.Schema.ObjectId,
+		ref: 'Image'
+	},
+	name: String
 });
 
 const Image = mongoose.model('Image', imageSchema);

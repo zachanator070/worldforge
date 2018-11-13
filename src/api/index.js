@@ -21,7 +21,7 @@ const port = process.env.API_PORT || 3000;
 const redisHost = process.env.REDIS_HOST || 'redis';
 
 app.use(morgan('tiny'));
-app.use(session({ store: new RedisStore({host: redisHost}), secret: uuidv4(), cookie: {maxAge: 1000 * 60 * 5} }));
+app.use(session({ store: new RedisStore({host: redisHost}), secret: 'super secret', cookie: {maxAge: 1000 * 60 * 5} }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(passport.initialize());
@@ -39,6 +39,7 @@ const WorldRouter = require('./routes/api/worldrouter');
 const WikiPageRouter = require('./routes/api/wikipagerouter');
 const ImageRouter = require('./routes/api/imagerouter');
 const ChunkRouter = require('./routes/api/chunkrouter');
+const WikiFolderRouter = require('./routes/api/wikifolderrouter');
 
 app.use("/ui", UiRouter);
 app.use('/api/auth', AuthRouter);
@@ -47,5 +48,6 @@ app.use('/api/worlds', WorldRouter);
 app.use('/api/wikiPages', WikiPageRouter);
 app.use('/api/images', ImageRouter);
 app.use('/api/chunks', ChunkRouter);
+app.use('/api/wikiFolders', WikiFolderRouter);
 
 app.listen(port, () => console.log(`listening on port ${port}`));

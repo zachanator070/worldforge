@@ -8,7 +8,7 @@ const wikiPageSchema = Schema({
 	},
 	type: {
 		type: String,
-		enum: ['person', 'place', 'item', 'ability', 'spell', 'article'],
+		enum: ['person', 'place', 'item', 'ability', 'spell', 'article', 'monster'],
 		required: [true, 'type required']
 	},
 	world: {
@@ -30,7 +30,7 @@ const wikiPageSchema = Schema({
 		},
 		ref: 'Image'
 	},
-	content: String
+	content: Object
 });
 
 const WikiPage = mongoose.model('WikiPage', wikiPageSchema);

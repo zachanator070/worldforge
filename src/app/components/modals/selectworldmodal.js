@@ -15,8 +15,7 @@ class SelectWorldModal extends Component {
 		}
 
 		if(item.name){
-			let copy = {};
-			copy = Object.assign(item, copy);
+			let copy = Object.assign({}, item);
 			return (
 				<a href='#' onClick={async () => {
 					this.props.setDisplayWorld(item);
@@ -50,6 +49,7 @@ class SelectWorldModal extends Component {
 				footer={[
 					<Button
 						type={'primary'}
+						key='select button'
 						onClick={() => {
 							this.props.submitSelectWorldModal(this.props.displayWorld._id);
 						}}

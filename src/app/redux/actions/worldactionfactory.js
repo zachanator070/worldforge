@@ -12,18 +12,14 @@ class WorldActionFactory {
 	static CREATE_WORLDS_ERROR = 'CREATE_WORLDS_ERROR';
 	static SET_DISPLAY_WORLD = 'SET_DISPLAY_WORLD';
 
-	static findAndSetCurrentWorld(worldId){
-		return async (dispatch, getState, { apiClient, history}) => {
-			let world = null;
-			if(worldId !== null){
-				world = await apiClient.getWorld(worldId).catch((error) => {
-					dispatch(UIActionFactory.gotoPage('/ui', {}));
-					return null;
-				});
+	static getAndSetCurrentWorld(worldId) {
+		return async (dispatch, getState, {apiClient, history}) => {
+			const world = await apiClient.getWorld(worldId).catch(err => {
+				dispatch(UIActionFactory.gotoPage('/ui', {}, true));
+			});
+			if(world !== undefined){
+				dispatch(WorldActionFactory.setCurrentWorld(world));
 			}
-
-			dispatch(WorldActionFactory.setCurrentWorld(world));
-
 		}
 	}
 
@@ -36,14 +32,17 @@ class WorldActionFactory {
 			if(world && world.wikiPage.mapImage){
 				dispatch(MapActionFactory.getAndSetMap(world.wikiPage.mapImage._id));
 			}
-			dispatch(UIActionFactory.redirectAfterWorldChange());
 		};
 	}
 
 	static fetchAvailableWorlds(){
 		return async (dispatch, getState, { apiClient, history}) => {
 			try{
-				let worlds = await apiClient.fetchAvailableWorlds();
+				let worldIds = await apiClient.fetchAvailableWorlds();
+				const worlds = [];
+				for(let worldId of worldIds){
+					worlds.push(await apiClient.getWorld(worldId));
+				}
 				dispatch(WorldActionFactory.setAvailableWorlds(worlds));
 			} catch (error){
 				dispatch(WorldActionFactory.fetchWorldsError(error.message))
@@ -70,13 +69,16 @@ class WorldActionFactory {
 
 	static createWorld(name, isPublic){
 		return async (dispatch, getState, { apiClient, history}) => {
-			try{
+			try {
 				let world = await apiClient.createWorld(name, isPublic);
-				const wikiPage = await apiClient.createWikiPage(name, world._id, ApiClient.WIKI_PLACE);
-				world.wikiPage = wikiPage._id;
-				await apiClient.updateWorld(world);
 				dispatch(this.fetchAvailableWorlds());
-				dispatch(UIActionFactory.showCreateWorldModal(false))
+				dispatch(UIActionFactory.showCreateWorldModal(false));
+				dispatch(WorldActionFactory.setCurrentWorld(world));
+				const newUser = await apiClient.setCurrentWorld(world);
+				dispatch({
+					type: LoginActionFactory.SET_CURRENT_USER,
+					user: newUser
+				});
 			} catch (error) {
 				dispatch(this.createWorldError(error.message || error.error))
 			}

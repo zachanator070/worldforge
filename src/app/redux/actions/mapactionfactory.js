@@ -5,11 +5,13 @@ class MapActionFactory {
 	static SET_CURRENT_MAP_CHUNKS = 'SET_CURRENT_MAP_CHUNKS';
 	static SET_CURRENT_MAP_POSITION = 'SET_CURRENT_MAP_POSITION';
 	static SET_CURRENT_MAP_ZOOM = 'SET_CURRENT_MAP_ZOOM';
+	static SET_PINS = 'SET_PINS';
 
 	static getAndSetMap(mapId){
 		return async (dispatch, getState, {apiClient, history}) => {
 			const mapImage = await apiClient.getImage(mapId);
 			dispatch(MapActionFactory.setMap(mapImage));
+			// dispatch(MapActionFactory.setCurrentMapPosition(mapImage.width/2, mapImage.height/2));
 			const chunks = await apiClient.getChunks(mapImage._id);
 			dispatch(MapActionFactory.setCurrentMapChunks(chunks));
 		};
@@ -59,6 +61,41 @@ class MapActionFactory {
 		return{
 			type: MapActionFactory.SET_CURRENT_MAP_ZOOM,
 			zoom: zoom
+		}
+	}
+
+	static getAndSetPins(){
+		return async (dispatch, getState, {apiClient, history}) => {
+			const pins = await apiClient.getPins();
+			dispatch(MapActionFactory.setPins(pins));
+		}
+	}
+
+	static setPins(pins){
+		return {
+			type: MapActionFactory.SET_PINS,
+			pins: pins
+		}
+	}
+
+	static updatePin(pin){
+		return async (dispatch, getState, {apiClient, history}) => {
+			await apiClient.updatePin(pin);
+			dispatch(MapActionFactory.getAndSetPins());
+		}
+	}
+
+	static createPin(pin){
+		return async (dispatch, getState, {apiClient, history}) => {
+			await apiClient.createPin(pin);
+			dispatch(MapActionFactory.getAndSetPins());
+		}
+	}
+
+	static deletePin(pin){
+		return async (dispatch, getState, {apiClient, history}) => {
+			await apiClient.deletePin(pin);
+			dispatch(MapActionFactory.getAndSetPins());
 		}
 	}
 }

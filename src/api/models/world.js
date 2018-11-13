@@ -23,6 +23,10 @@ const worldSchema = Schema({
 	wikiPage: {
 		type: mongoose.Schema.ObjectId,
 		ref: 'WikiPage'
+	},
+	rootFolder: {
+		type: mongoose.Schema.ObjectId,
+		ref: 'WikiFolder'
 	}
 });
 

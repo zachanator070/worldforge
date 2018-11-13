@@ -2,6 +2,7 @@ import WorldActionFactory from "./worldactionfactory";
 import queryString from "query-string";
 import LoginActionFactory from "./loginactionfactory";
 import MapActionFactory from "./mapactionfactory";
+import WikiActionFactory from "./wikiactionfactory";
 
 class UIActionFactory {
 
@@ -10,6 +11,7 @@ class UIActionFactory {
 	static SHOW_WORLD_SELECT_MODAL = 'SHOW_WORLD_SELECT_MODAL';
 	static SHOW_WORLD_PERMISSION_MODAL = 'SHOW_WORLD_PERMISSION_MODAL';
 	static SHOW_CREATE_WORLD_MODAL = 'SHOW_CREATE_WORLD_MODAL';
+	static SHOW_DRAWER = 'SHOW_DRAWER';
 
 	static showLoginModal(show){
 		return {
@@ -52,7 +54,7 @@ class UIActionFactory {
 				});
 			}
 			dispatch(UIActionFactory.showSelectWorldModal(false));
-			dispatch(UIActionFactory.gotoPage('/ui/map', {world: world._id}));
+			dispatch(UIActionFactory.gotoPage('/ui/map', {world: world._id}, true));
 		}
 	}
 
@@ -74,10 +76,13 @@ class UIActionFactory {
 		}
 	}
 
-	static gotoPage(url, queryArgs = null){
+	static gotoPage(url, queryArgs = {}, override = false){
 		return async (dispatch, getState, {apiClient, history}) => {
-			if(!queryArgs){
-				queryArgs = queryString.parse(history.location.search);
+			if(!override){
+				queryArgs = Object.assign({}, queryString.parse(history.location.search), queryArgs);
+			}
+			if(!url){
+				url = history.location.pathname
 			}
 			history.push(url + '?' + Object.keys(queryArgs).map((key) => {return key + '=' + queryArgs[key]}).join('&'));
 			dispatch(UIActionFactory.applyUrlQueryArgs(queryArgs));
@@ -92,19 +97,19 @@ class UIActionFactory {
 
 			if(queryArgs.world){
 				if(!getState().currentWorld || getState().currentWorld._id !== queryArgs.world){
-					dispatch(WorldActionFactory.findAndSetCurrentWorld(queryArgs.world));
+					await dispatch(WorldActionFactory.getAndSetCurrentWorld(queryArgs.world));
 				}
 			}
 
 			if(queryArgs.map){
 				if(!getState().currentMap.map || getState().currentMap.map._id !== queryArgs.map){
-					dispatch(MapActionFactory.getAndSetMap(queryArgs.map))
+					await dispatch(MapActionFactory.getAndSetMap(queryArgs.map))
 				}
 			}
 
 			if(queryArgs.wiki){
 				if(!getState().currentWiki || getState().currentWiki._id !== queryArgs.wiki){
-					dispatch(MapActionFactory.getAndSetMap(queryArgs.wiki))
+					await dispatch(WikiActionFactory.getAndSetWiki(queryArgs.wiki))
 				}
 			}
 		}
@@ -116,22 +121,29 @@ class UIActionFactory {
 			if(getState().currentWorld){
 				if(history.location.pathname === '/ui/' || history.location.pathname === '/ui/map/'){
 					if(getState().currentWorld.wikiPage.mapImage){
-						dispatch(UIActionFactory.gotoPage('/ui/map/',{world: getState().currentWorld._id, map: getState().currentWorld.wikiPage.mapImage._id}));
+						dispatch(UIActionFactory.gotoPage('/ui/map/',{world: getState().currentWorld._id, map: getState().currentWorld.wikiPage.mapImage._id}, true));
 					}
 					else{
-						dispatch(UIActionFactory.gotoPage('/ui/map/',{world: getState().currentWorld._id}));
+						dispatch(UIActionFactory.gotoPage('/ui/map/',{world: getState().currentWorld._id}, true));
 					}
 				}
 				else{
-					dispatch(UIActionFactory.gotoPage(history.location.pathname, {world: getState().currentWorld._id}));
+					dispatch(UIActionFactory.gotoPage(history.location.pathname, {world: getState().currentWorld._id}, true));
 				}
 
 			}
 			else {
 				// clear url params if we are clearing current world
-				dispatch(UIActionFactory.gotoPage(history.location.pathname, {}));
+				dispatch(UIActionFactory.gotoPage(history.location.pathname, {}, true));
 			}
 		}
+	}
+
+	static showDrawer(show){
+		return {
+			type: UIActionFactory.SHOW_DRAWER,
+			show: show
+		};
 	}
 }
 
