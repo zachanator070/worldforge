@@ -11,9 +11,9 @@ class MapActionFactory {
 		return async (dispatch, getState, {apiClient, history}) => {
 			const mapImage = await apiClient.getImage(mapId);
 			dispatch(MapActionFactory.setMap(mapImage));
-			// dispatch(MapActionFactory.setCurrentMapPosition(mapImage.width/2, mapImage.height/2));
 			const chunks = await apiClient.getChunks(mapImage._id);
 			dispatch(MapActionFactory.setCurrentMapChunks(chunks));
+			dispatch(MapActionFactory.getAndSetPins(getState().currentWorld._id));
 		};
 	}
 
@@ -66,7 +66,7 @@ class MapActionFactory {
 
 	static getAndSetPins(){
 		return async (dispatch, getState, {apiClient, history}) => {
-			const pins = await apiClient.getPins();
+			const pins = await apiClient.getPins(getState().currentWorld._id);
 			dispatch(MapActionFactory.setPins(pins));
 		}
 	}

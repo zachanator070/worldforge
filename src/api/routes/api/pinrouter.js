@@ -51,7 +51,7 @@ PinRouter.get('/', (req, res, next) => {
 			params.map = req.query.map;
 		}
 
-		Pin.find(params).populate('world map page').exec((err, pins) => {
+		Pin.find(params).populate('world page').exec((err, pins) => {
 			if(err){
 				return res.status(500).json({error: err})
 			}

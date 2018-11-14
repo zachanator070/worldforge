@@ -143,7 +143,6 @@ div.ant-upload-list-item{
 	width: 30%;
 	padding: 15px;
 	z-index: 2;
-	background-color: white;
 }
 
 .drawer-content {
@@ -151,6 +150,7 @@ div.ant-upload-list-item{
 	width: 100%;
 	height: 100%;
 	border-right: thin lightgrey solid;
+	background-color: white;
 }
 
 .show-drawer{

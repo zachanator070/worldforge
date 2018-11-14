@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import * as mathjs from 'mathjs';
+import {Dropdown, Icon, Menu, Popover} from "antd";
 
 class MapCanvas extends Component {
 
@@ -13,8 +14,8 @@ class MapCanvas extends Component {
 
 	updateMapPosition = (evt) => {
 		if(this.state.lastMouseX && this.state.lastMouseY){
-			const newX = this.props.currentMap.x + (evt.clientX - this.state.lastMouseX);
-			const newY = this.props.currentMap.y + (evt.clientY - this.state.lastMouseY);
+			let newX = this.props.currentMap.x + (evt.clientX - this.state.lastMouseX) / this.props.currentMap.zoom;
+			let newY = this.props.currentMap.y + (evt.clientY - this.state.lastMouseY) / this.props.currentMap.zoom;
 			this.props.setCurrentMapPosition(newX, newY);
 		}
 		this.setState({
@@ -26,6 +27,10 @@ class MapCanvas extends Component {
 	componentDidMount(){
 		const canvas = this.refs.canvas;
 		canvas.addEventListener('mousedown', (mousedownEvent) => {
+			this.setState({
+				lastMouseX: mousedownEvent.clientX,
+				lastMouseY: mousedownEvent.clientY
+			});
 			canvas.addEventListener('mousemove', this.updateMapPosition, false);
 		}, false);
 		canvas.addEventListener('mouseup', (mouseUpEvent) => {
@@ -35,6 +40,13 @@ class MapCanvas extends Component {
 				lastMouseY: null
 			});
 		}, false);
+
+		let smallestRatio = this.props.width / this.props.currentMap.image.width;
+		if(this.props.height / this.props.currentMap.image.height < smallestRatio){
+			smallestRatio = this.props.height / this.props.currentMap.image.height;
+		}
+		this.props.setCurrentMapZoom(smallestRatio);
+		this.props.setCurrentMapPosition(-this.props.currentMap.image.width/2, -this.props.currentMap.image.height/2);
 	}
 
 	clip = (x, y, width, height) => {
@@ -51,46 +63,28 @@ class MapCanvas extends Component {
 			zoomRate *= -1;
 		}
 		const newZoom = this.props.currentMap.zoom + zoomRate;
-		this.props.setCurrentMapZoom(newZoom);
-
-		let deltaX = this.props.currentMap.image.width * zoomRate / 2;
-		let deltaY = this.props.currentMap.image.height * zoomRate / 2;
-
-		this.props.setCurrentMapPosition(
-			this.props.currentMap.x - deltaX,
-			this.props.currentMap.y - deltaY,
-		);
+		if(newZoom < 2 && newZoom > 0){
+			this.props.setCurrentMapZoom(newZoom);
+		}
 
 	};
 
-	getCameraCoords = (x, y) => {
+	translate = (x, y) => {
 
-		const worldCordinates = mathjs.matrix([[x], [y], [0], [1]]);
-		const distance = 100 * this.props.currentMap.zoom;
+		x += this.props.currentMap.x;
+		y += this.props.currentMap.y;
 
-		// world coordinates * view = camera coordinates
-		const viewMatrix = mathjs.matrix([
-			[1, 0, 0, -this.props.currentMap.x],
-			[0, 1, 0, -this.props.currentMap.y],
-			[0, 0, 1, -distance],
-			[0, 0, 0, 1],
-		]);
+		x *= this.props.currentMap.zoom;
+		y *= this.props.currentMap.zoom;
 
-		const left = 0 - this.props.width/2;
-		const right = this.props.width/2;
-		const top =  this.props.height/2;
-		const bottom = 0 - this.props.height/2;
-		const near = 0;
-		const far = 0 - distance;
+		x += this.props.width / 2;
+		y += this.props.height / 2;
 
-		const projectionMatrix = mathjs.matrix([
-			[2/(right - left), 0 ,0 , -(right + left)/(right - left)],
-			[0, 2/(top - bottom) , 0 , -(top + bottom)/(top - bottom)],
-			[0, 0,  -2/(far - near), -(far + near)/(far - near)],
-			[0, 0, 0, 1]
-		]);
+		x = Math.floor(x);
+		y = Math.floor(y);
 
-		return mathjs.multiply(projectionMatrix, mathjs.multiply(viewMatrix, worldCordinates));
+		return [x, y];
+
 	};
 
 	render(){
@@ -98,16 +92,17 @@ class MapCanvas extends Component {
 
 		for (let chunk of this.props.chunks){
 
-			const x = chunk.x * 250 * this.props.currentMap.zoom + this.props.currentMap.x;
-			const y = chunk.y * 250 * this.props.currentMap.zoom + this.props.currentMap.y;
+			const coordinates = this.translate(chunk.x * 250, chunk.y * 250);
+			const x = coordinates[0];
+			const y = coordinates[1];
 
-			const width = chunk.width * this.props.currentMap.zoom;
-			const height = chunk.height * this.props.currentMap.zoom;
+			let width = chunk.width;
+			width *= this.props.currentMap.zoom;
+			width = Math.ceil(width);
 
-			// const cameraCoordinates = this.getCameraCoords(chunk.x * 250, chunk.y * 250);
-
-			// const x = cameraCoordinates.subset(mathjs.index(0,0)) * this.props.width;
-			// const y = cameraCoordinates.subset(mathjs.index(1,0)) * this.props.height;
+			let height = chunk.height;
+			height *= this.props.currentMap.zoom;
+			height = Math.ceil(height);
 
 			images.push(
 				<img
@@ -120,11 +115,70 @@ class MapCanvas extends Component {
 			);
 
 		}
-		return (
-			<div ref='canvas' className='margin-none overflow-hidden' style={{width: this.props.width, height: this.props.height}} onWheel={this.handleWheelEvent}>
+
+		for (let pin of this.props.currentMap.pins){
+
+			const coordinates = this.translate(pin.x, pin.y);
+			const x = coordinates[0];
+			const y = coordinates[1];
+
+			let title = 'Empty Pin';
+			let content = null;
+
+			if(pin.page){
+				title = pin.page.name;
+			}
+
+			images.push(
+				<Popover
+					content={content}
+					title={title}
+					trigger="click"
+					key={pin._id}
+				>
+					<a href='#'>
+						<Icon
+							type="pushpin"
+							style={{position: 'absolute', left: x, top: y, width: 30, height: 30}}
+							draggable="false"
+						/>
+					</a>
+				</Popover>
+
+			);
+
+		}
+
+		let canvas =
+			<div
+				ref='canvas'
+				className='margin-none overflow-hidden'
+				style={{width: this.props.width, height: this.props.height}}
+				onWheel={this.handleWheelEvent}
+			>
 				{images}
-			</div>
-		);
+			</div>;
+		if(this.props.currentWorld.canWrite){
+			canvas = <Dropdown
+				overlay={
+					<Menu>
+						<Menu.Item key='new pin' onClick={() => {
+							let pin = {
+								x: (this.state.lastMouseX - this.props.width / 2 ) / this.props.currentMap.zoom - this.props.currentMap.x,
+								y: (this.state.lastMouseY - this.props.height / 2 ) / this.props.currentMap.zoom - this.props.currentMap.y,
+								world: this.props.currentWorld._id,
+								map: this.props.currentMap.image._id
+							};
+							this.props.createPin(pin);
+						}}>New Pin</Menu.Item>
+					</Menu>
+				}
+				trigger={['contextMenu']}
+			>
+				{canvas}
+			</Dropdown>;
+		}
+		return canvas;
 	}
 
 }

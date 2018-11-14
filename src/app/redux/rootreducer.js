@@ -155,7 +155,8 @@ class RootReducer {
 		chunks: [],
 		x: 0,
 		y: 0,
-		zoom: 1
+		zoom: 1,
+		pins: []
 	}, action){
 		switch (action.type) {
 			case MapActionFactory.SET_CURRENT_MAP:
@@ -174,6 +175,10 @@ class RootReducer {
 			case MapActionFactory.SET_CURRENT_MAP_ZOOM:
 				return Object.assign({}, state, {
 					zoom: action.zoom
+				});
+			case MapActionFactory.SET_PINS:
+				return Object.assign({}, state, {
+					pins: action.pins
 				});
 			default:
 				return state;

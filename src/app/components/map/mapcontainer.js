@@ -8,24 +8,17 @@ import MapCanvas from "./mapcanvas";
 import MapActionFactory from "../../redux/actions/mapactionfactory";
 import WikiView from "../wiki/wikiview";
 import UIActionFactory from "../../redux/actions/uiactionfactory";
+import DefaultMapView from "./defaultmapview";
 
 class Map extends Component {
 
 	constructor(props){
 		super(props);
 		this.state = {
-			mapToUpload: null,
 			width: 0,
 			height: 0
 		};
 	}
-
-	beforeUpload = (file) => {
-		this.setState({
-			mapToUpload: file
-		});
-		return false;
-	};
 
 	componentDidMount(){
 		this.updateWindowDimensions();
@@ -40,9 +33,7 @@ class Map extends Component {
 		this.setState({ width: window.innerWidth, height: window.innerHeight - 42});
 	};
 
-	upload = () => {
-		this.props.uploadImageFromMap(this.state.mapToUpload);
-	};
+
 
 	render(){
 		if(!this.props.currentWorld){
@@ -56,33 +47,13 @@ class Map extends Component {
 			setCurrentMapPosition={this.props.setCurrentMapPosition}
 			setCurrentMapZoom={this.props.setCurrentMapZoom}
 			currentMap={this.props.currentMap}
+			createPin={this.props.createPin}
+			updatePin={this.props.updatePin}
+			currentWorld={this.props.currentWorld}
 		/>;
 
 		if(!this.props.currentMap.image){
-			canvas = (
-				<div className='padding-lg text-align-center'>
-					<div className='padding-lg'>
-						Map Image does not exist
-					</div>
-					<div className='padding-lg'>
-						<Upload
-							action="/api/images"
-							beforeUpload={this.beforeUpload}
-							multiple={false}
-							showUploadList={true}
-							fileList={this.state.mapToUpload ? [this.state.mapToUpload] : []}
-							className='inline-block'
-						>
-							<Button>
-								<Icon type="upload" /> Select Map
-							</Button>
-						</Upload>
-					</div>
-					{this.state.mapToUpload ? <Button onClick={this.upload}>
-						Upload
-					</Button> : null}
-				</div>
-			);
+			canvas = <DefaultMapView/>;
 		}
 
 		return (
@@ -115,7 +86,7 @@ const mapStateToProps = state => {
 		currentWorld: state.currentWorld,
 		currentMap: state.currentMap,
 		displayWiki: state.displayWiki,
-		ui: state.ui
+		ui: state.ui,
 	}
 };
 
@@ -135,7 +106,11 @@ const mapDispatchToProps = dispatch => {
 		},
 		setCurrentMapZoom: (zoom) => {
 			dispatch(MapActionFactory.setCurrentMapZoom(zoom));
-		}
+		},
+		createPin: (pin) => {
+			dispatch(MapActionFactory.createPin(pin))
+		},
+
 	}
 };
  const MapContainer = connect(

@@ -40,6 +40,7 @@ const WikiPageRouter = require('./routes/api/wikipagerouter');
 const ImageRouter = require('./routes/api/imagerouter');
 const ChunkRouter = require('./routes/api/chunkrouter');
 const WikiFolderRouter = require('./routes/api/wikifolderrouter');
+const PinRouter = require('./routes/api/pinrouter');
 
 app.use("/ui", UiRouter);
 app.use('/api/auth', AuthRouter);
@@ -49,5 +50,6 @@ app.use('/api/wikiPages', WikiPageRouter);
 app.use('/api/images', ImageRouter);
 app.use('/api/chunks', ChunkRouter);
 app.use('/api/wikiFolders', WikiFolderRouter);
+app.use('/api/pins', PinRouter);
 
 app.listen(port, () => console.log(`listening on port ${port}`));

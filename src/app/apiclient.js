@@ -286,14 +286,14 @@ class ApiClient {
 		return await this.jsonOrError(response);
 	}
 
-	async getPins(){
+	async getPins(worldId){
 		let response = await fetch(
-			`/api/pins`,
+			`/api/pins?world=${worldId}`,
 			{
 				method: 'GET',
 			}
 		);
-		return await response.jsonOrError(response);
+		return await this.jsonOrError(response);
 	}
 
 	async updatePin(pin){
