@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import * as mathjs from 'mathjs';
 import {Dropdown, Icon, Menu, Popover} from "antd";
 
 class MapCanvas extends Component {

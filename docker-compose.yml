@@ -1,22 +1,71 @@
 version: "3"
 services:
 
-  webapp:
-    image: "node:latest"
-    user: "node"
-    working_dir: /home/node/app
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: "npm run start-dev"
     env_file:
       - .env
     volumes:
-    - ./:/home/node/app
+    - ./src:/home/node/app/src
+    - ./dist:/home/node/app/dist
     ports:
     - "${API_PORT:-3000}:${API_PORT:-3000}"
     - "9229:9229"
-    command: "npm run start-dev"
     depends_on:
       - mongodb
+      - redis
+      - build-dev
     networks:
       - worldforge
+
+  prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: "npm run start"
+    env_file:
+    - .env
+    volumes:
+    - ./src:/home/node/app/src
+    - ./dist:/home/node/app/dist
+    ports:
+    - "${API_PORT:-3000}:${API_PORT:-3000}"
+    - "9229:9229"
+    depends_on:
+    - mongodb
+    - redis
+    - build-prod
+    networks:
+    - worldforge
+
+  build-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+     - .env
+    volumes:
+     - ./src:/home/node/app/src
+     - ./dist:/home/node/app/dist
+    command: "npm run watch"
+    networks:
+     - worldforge
+
+  build-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+     - .env
+    volumes:
+     - ./src:/home/node/app/src
+     - ./dist:/home/node/app/dist
+    command: "npm run build"
+    networks:
+     - worldforge
 
   mongodb:
     image: "mongo:latest"
