@@ -12,7 +12,7 @@ class EditPinModal extends Component {
 
 	save = () => {
 		const newPin = {
-			page: this.state.page._id,
+			page: this.state.page,
 			_id: this.props.pin._id
 		};
 		this.props.updatePin(newPin);
@@ -36,7 +36,7 @@ class EditPinModal extends Component {
 
 		const options = [];
 		for(let result of this.props.allWikis){
-			options.push(<Select.Option value={result._id} key={result._id}>{result.name}</Select.Option>);
+			options.push(<Select.Option  value={result._id} key={result._id}>{result.name}</Select.Option>);
 		}
 
 		return (
@@ -48,26 +48,29 @@ class EditPinModal extends Component {
 					onCancel={() => {this.props.showEditPinModal(false);}}
 					footer={null}
 				>
-					<Form layout='horizontal' onSubmit={() => {this.save();}}>
+					<Form layout='horizontal'>
 						<Form.Item label="Page" {...formItemLayout}>
 							<Select
 								showSearch
 								style={{ width: 200 }}
-								placeholder="Select a person"
+								placeholder="Select a Wiki Page"
+								defaultValue={this.props.pinBeingEdited ? this.props.pinBeingEdited._id : null}
 								optionFilterProp="children"
 								onChange={this.handleChange}
 								filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
 							>
 								{options}
-							</Select>,
+							</Select>
 						</Form.Item>
 						<Form.Item
 							{...noLabelItem}>
-							<Button type="primary" htmlType="submit">Save</Button>
-						</Form.Item>
-						<Form.Item
-							{...noLabelItem}>
-							<Button type="warning" onClick={() => {this.props.deletePin({_id: this.props.pin._id})}}>Delete</Button>
+							<Button type="primary" htmlType="button" onClick={ () => {
+								this.save();
+							}}>Save</Button>
+							<Button className='margin-md-left' type="danger" onClick={() => {
+								this.props.deletePin({_id: this.props.pin._id});
+								this.props.showEditPinModal(false);
+							}}>Delete</Button>
 						</Form.Item>
 					</Form>
 				</Modal>

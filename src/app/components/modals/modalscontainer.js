@@ -10,6 +10,7 @@ import RegisterModal from "./registermodal";
 import SelectWorldModal from "./selectworldmodal";
 import CreateWorldModal from "./createworldmodal";
 import EditPinModal from "./editpinmodal";
+import MapActionFactory from "../../redux/actions/mapactionfactory";
 
 class Modals extends Component {
 	render(){
@@ -103,6 +104,12 @@ const mapDispatchToProps = dispatch => {
 		},
 		showEditPinModal: (show) => {
 			dispatch(UIActionFactory.showEditPinModal(show));
+		},
+		updatePin: (pin) => {
+			dispatch(MapActionFactory.updatePin(pin));
+		},
+		deletePin: (pin) => {
+			dispatch(MapActionFactory.deletePin(pin));
 		}
 	}
 };

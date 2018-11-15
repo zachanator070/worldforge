@@ -326,7 +326,7 @@ class ApiClient {
 
 	async deletePin(pin){
 		let response = await fetch(
-			`/api/pins${pin._id}`,
+			`/api/pins/${pin._id}`,
 			{
 				method: 'DELETE',
 			}

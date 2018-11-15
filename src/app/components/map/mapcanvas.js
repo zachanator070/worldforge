@@ -119,33 +119,33 @@ class MapCanvas extends Component {
 			const y = coordinates[1];
 
 			const editButton = this.props.currentWorld && this.props.currentWorld.canWrite ?
-				<a href='#' onClick={() => {
+				<a href='#' className='margin-md-left' onClick={() => {
 					this.props.setPinBeingEdited(pin);
 					this.props.showEditPinModal(true);
 				}}>Edit Pin</a>
 				: null;
 
-			let content = <div>
+			let pinPopupContent = <div>
 				<h2>Empty Pin</h2>
 				{editButton}
 			</div>;
 
 			if(pin.page){
-				content = <div>
+				pinPopupContent = <div>
 					<h2>{pin.page.name}</h2>
 					<h3>{pin.page.type}</h3>
 					<a href='#' onClick={() => {
 						this.props.findAndSetDisplayWiki(pin.page._id);
 						this.props.showDrawer(true);
 					}}>Details</a>
-					{pin.page.type === 'place' && pin.page.mapImage ? <a href='#' onClick={() => {this.props.gotoPage('/ui/map', {map: pin.page.mapImage})}}>Open Map</a> : null }
+					{pin.page.type === 'place' && pin.page.mapImage ? <a className='margin-md-left' href='#' onClick={() => {this.props.gotoPage('/ui/map', {map: pin.page.mapImage})}}>Open Map</a> : null }
 					{editButton}
 				</div>;
 			}
 
 			images.push(
 				<Popover
-					content={content}
+					content={pinPopupContent}
 					trigger="click"
 					key={pin._id}
 					overlayStyle={{zIndex: '1'}}

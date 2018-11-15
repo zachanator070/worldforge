@@ -47,7 +47,6 @@ class Map extends Component {
 			setCurrentMapZoom={this.props.setCurrentMapZoom}
 			currentMap={this.props.currentMap}
 			createPin={this.props.createPin}
-			updatePin={this.props.updatePin}
 			currentWorld={this.props.currentWorld}
 			findAndSetDisplayWiki={this.props.findAndSetDisplayWiki}
 			showDrawer={this.props.showDrawer}
