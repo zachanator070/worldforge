@@ -43,13 +43,16 @@ class Map extends Component {
 		let canvas = <MapCanvas
 			height={this.state.height}
 			width={this.state.width}
-			chunks={this.props.currentMap.chunks}
 			setCurrentMapPosition={this.props.setCurrentMapPosition}
 			setCurrentMapZoom={this.props.setCurrentMapZoom}
 			currentMap={this.props.currentMap}
 			createPin={this.props.createPin}
 			updatePin={this.props.updatePin}
 			currentWorld={this.props.currentWorld}
+			findAndSetDisplayWiki={this.props.findAndSetDisplayWiki}
+			showDrawer={this.props.showDrawer}
+			showEditPinModal={this.props.showEditPinModal}
+			setPinBeingEdited={this.props.setPinBeingEdited}
 		/>;
 
 		if(!this.props.currentMap.image){
@@ -110,7 +113,15 @@ const mapDispatchToProps = dispatch => {
 		createPin: (pin) => {
 			dispatch(MapActionFactory.createPin(pin))
 		},
-
+		findAndSetDisplayWiki: (wikiId) => {
+			dispatch(WikiActionFactory.findAndSetDisplayWiki(wikiId));
+		},
+		showEditPinModal: (show) => {
+			dispatch(UIActionFactory.showEditPinModal(show));
+		},
+		setPinBeingEdited: (pin) => {
+			dispatch(MapActionFactory.setPinBeingEdited(pin));
+		}
 	}
 };
  const MapContainer = connect(

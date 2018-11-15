@@ -109,7 +109,8 @@ class RootReducer {
 		showSelectWorldModal: false,
 		showCreateWorldModal: false,
 		showWorldPermissionModal: false,
-		showDrawer: false
+		showDrawer: false,
+		showEditPinModal: false
 	}, action){
 		switch(action.type){
 			case UIActionFactory.SHOW_LOGIN_MODAL:
@@ -135,6 +136,10 @@ class RootReducer {
 			case UIActionFactory.SHOW_DRAWER:
 				return Object.assign({}, state, {
 					showDrawer: action.show
+				});
+			case UIActionFactory.SHOW_EDIT_PIN_MODAL:
+				return Object.assign({}, state, {
+					showEditPinModal: action.show
 				});
 			default:
 				return state;
@@ -212,6 +217,24 @@ class RootReducer {
 		}
 	}
 
+	allWikisReducer(state = [], action){
+		switch (action.type) {
+			case WikiActionFactory.SET_ALL_WIKIS:
+				return action.results;
+			default:
+				return state;
+		}
+	}
+
+	pinBeingEditedReducer(state = null, action){
+		switch (action.type) {
+			case MapActionFactory.SET_PIN_BEING_EDITED:
+				return action.pin;
+			default:
+				return state;
+		}
+	}
+
 	getCombinedReducers() {
 		return this.combineReducers({
 			currentUser: this.currentUserReducer,
@@ -227,6 +250,8 @@ class RootReducer {
 			registerRequest: this.registerReducer,
 			getAvailableWorldsRequest: this.availableWorldsRequestReducer,
 			createWorldRequest: this.createWorldReducer,
+			allWikis: this.allWikisReducer,
+			pinBeingEdited: this.pinBeingEditedReducer
 		});
 	}
 }

@@ -8,6 +8,7 @@ class WikiActionFactory{
 	static CREATE_WIKI_ERROR = 'CREATE_WIKI_ERROR';
 	static SET_WIKI_SEARCH_RESULTS = 'SET_WIKI_SEARCH_RESULTS';
 	static SET_DISPLAY_WIKI = 'SET_DISPLAY_WIKI';
+	static SET_ALL_WIKIS = 'SET_ALL_WIKIS';
 
 	static getAndSetWiki(wikiId){
 		return async (dispatch, getState, {apiClient, history}) => {
@@ -125,6 +126,16 @@ class WikiActionFactory{
 			const results = await apiClient.searchWikis(params);
 			dispatch({
 				type: WikiActionFactory.SET_WIKI_SEARCH_RESULTS,
+				results: results
+			});
+		}
+	}
+
+	static getAllWikis(){
+		return async (dispatch, getState, {apiClient, history}) => {
+			const results = await apiClient.searchWikis({world: getState().currentWorld._id});
+			dispatch({
+				type: WikiActionFactory.SET_ALL_WIKIS,
 				results: results
 			});
 		}

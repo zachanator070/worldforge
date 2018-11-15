@@ -3,6 +3,7 @@ import LoginActionFactory from "./loginactionfactory";
 import ApiClient from "../../apiclient";
 import ApiError from "../../exceptions";
 import MapActionFactory from "./mapactionfactory";
+import WikiActionFactory from "./wikiactionfactory";
 
 class WorldActionFactory {
 
@@ -32,6 +33,7 @@ class WorldActionFactory {
 			if(world && world.wikiPage.mapImage){
 				dispatch(MapActionFactory.getAndSetMap(world.wikiPage.mapImage._id));
 			}
+			dispatch(WikiActionFactory.getAllWikis());
 		};
 	}
 

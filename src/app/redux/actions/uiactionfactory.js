@@ -12,6 +12,7 @@ class UIActionFactory {
 	static SHOW_WORLD_PERMISSION_MODAL = 'SHOW_WORLD_PERMISSION_MODAL';
 	static SHOW_CREATE_WORLD_MODAL = 'SHOW_CREATE_WORLD_MODAL';
 	static SHOW_DRAWER = 'SHOW_DRAWER';
+	static SHOW_EDIT_PIN_MODAL = 'SHOW_EDIT_PIN_MODAL';
 
 	static showLoginModal(show){
 		return {
@@ -144,6 +145,13 @@ class UIActionFactory {
 			type: UIActionFactory.SHOW_DRAWER,
 			show: show
 		};
+	}
+
+	static showEditPinModal(show){
+		return {
+			type: UIActionFactory.SHOW_EDIT_PIN_MODAL,
+			show: show
+		}
 	}
 }
 

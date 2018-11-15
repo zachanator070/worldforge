@@ -19,10 +19,10 @@ const pinSchema = Schema({
 		type: mongoose.Schema.ObjectId,
 		ref: 'Image'
 	}],
-	page: [{
+	page: {
 		type: mongoose.Schema.ObjectId,
 		ref: 'WikiPage'
-	}]
+	}
 });
 
 const Pin = mongoose.model('Pin', pinSchema);

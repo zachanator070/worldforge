@@ -6,6 +6,7 @@ class MapActionFactory {
 	static SET_CURRENT_MAP_POSITION = 'SET_CURRENT_MAP_POSITION';
 	static SET_CURRENT_MAP_ZOOM = 'SET_CURRENT_MAP_ZOOM';
 	static SET_PINS = 'SET_PINS';
+	static SET_PIN_BEING_EDITED = 'SET_PIN_BEING_EDITED';
 
 	static getAndSetMap(mapId){
 		return async (dispatch, getState, {apiClient, history}) => {
@@ -96,6 +97,13 @@ class MapActionFactory {
 		return async (dispatch, getState, {apiClient, history}) => {
 			await apiClient.deletePin(pin);
 			dispatch(MapActionFactory.getAndSetPins());
+		}
+	}
+
+	static setPinBeingEdited(pin){
+		return {
+			type: MapActionFactory.SET_PIN_BEING_EDITED,
+			pin: pin
 		}
 	}
 }

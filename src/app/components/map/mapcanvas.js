@@ -8,7 +8,7 @@ class MapCanvas extends Component {
 		super(props);
 		this.state = {
 			lastMouseX: null,
-			lastMouseY: null
+			lastMouseY: null,
 		};
 	}
 
@@ -35,10 +35,6 @@ class MapCanvas extends Component {
 		}, false);
 		canvas.addEventListener('mouseup', (mouseUpEvent) => {
 			canvas.removeEventListener('mousemove', this.updateMapPosition);
-			this.setState({
-				lastMouseX: null,
-				lastMouseY: null
-			});
 		}, false);
 
 		let smallestRatio = this.props.width / this.props.currentMap.image.width;
@@ -90,7 +86,7 @@ class MapCanvas extends Component {
 	render(){
 		const images = [];
 
-		for (let chunk of this.props.chunks){
+		for (let chunk of this.props.currentMap.chunks){
 
 			const coordinates = this.translate(chunk.x * 250, chunk.y * 250);
 			const x = coordinates[0];
@@ -122,27 +118,44 @@ class MapCanvas extends Component {
 			const x = coordinates[0];
 			const y = coordinates[1];
 
-			let title = 'Empty Pin';
-			let content = null;
+			const editButton = this.props.currentWorld && this.props.currentWorld.canWrite ?
+				<a href='#' onClick={() => {
+					this.props.setPinBeingEdited(pin);
+					this.props.showEditPinModal(true);
+				}}>Edit Pin</a>
+				: null;
+
+			let content = <div>
+				<h2>Empty Pin</h2>
+				{editButton}
+			</div>;
 
 			if(pin.page){
-				title = pin.page.name;
+				content = <div>
+					<h2>{pin.page.name}</h2>
+					<h3>{pin.page.type}</h3>
+					<a href='#' onClick={() => {
+						this.props.findAndSetDisplayWiki(pin.page._id);
+						this.props.showDrawer(true);
+					}}>Details</a>
+					{pin.page.type === 'place' && pin.page.mapImage ? <a href='#' onClick={() => {this.props.gotoPage('/ui/map', {map: pin.page.mapImage})}}>Open Map</a> : null }
+					{editButton}
+				</div>;
 			}
 
 			images.push(
 				<Popover
 					content={content}
-					title={title}
 					trigger="click"
 					key={pin._id}
+					overlayStyle={{zIndex: '1'}}
 				>
-					<a href='#'>
-						<Icon
-							type="pushpin"
-							style={{position: 'absolute', left: x, top: y, width: 30, height: 30}}
-							draggable="false"
-						/>
-					</a>
+					<Icon
+						type="pushpin"
+						style={{position: 'absolute', left: x, top: y - 50, fontSize: '50px', zIndex:3, color:'red'}}
+						theme='filled'
+						draggable="false"
+					/>
 				</Popover>
 
 			);
@@ -158,14 +171,14 @@ class MapCanvas extends Component {
 			>
 				{images}
 			</div>;
-		if(this.props.currentWorld.canWrite){
+		if(this.props.currentWorld && this.props.currentWorld.canWrite){
 			canvas = <Dropdown
 				overlay={
-					<Menu>
+					<Menu >
 						<Menu.Item key='new pin' onClick={() => {
 							let pin = {
 								x: (this.state.lastMouseX - this.props.width / 2 ) / this.props.currentMap.zoom - this.props.currentMap.x,
-								y: (this.state.lastMouseY - this.props.height / 2 ) / this.props.currentMap.zoom - this.props.currentMap.y,
+								y: (this.state.lastMouseY - 42 - this.props.height / 2 ) / this.props.currentMap.zoom - this.props.currentMap.y,
 								world: this.props.currentWorld._id,
 								map: this.props.currentMap.image._id
 							};

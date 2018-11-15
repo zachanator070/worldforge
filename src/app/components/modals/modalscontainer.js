@@ -9,6 +9,7 @@ import LoginModal from "./loginmodal";
 import RegisterModal from "./registermodal";
 import SelectWorldModal from "./selectworldmodal";
 import CreateWorldModal from "./createworldmodal";
+import EditPinModal from "./editpinmodal";
 
 class Modals extends Component {
 	render(){
@@ -42,6 +43,14 @@ class Modals extends Component {
 					createWorld={this.props.createWorld}
 					showCreateWorldModal={this.props.showCreateWorldModal}
 				/>
+				<EditPinModal
+					pin={this.props.pinBeingEdited}
+					updatePin={this.props.updatePin}
+					deletePin={this.props.deletePin}
+					allWikis={this.props.allWikis}
+					show={this.props.ui.showEditPinModal}
+					showEditPinModal={this.props.showEditPinModal}
+				/>
 			</div>
 		);
 	}
@@ -57,7 +66,9 @@ const mapStateToProps = state => {
 		ui: state.ui,
 		currentWorld: state.currentWorld,
 		availableWorlds: state.availableWorlds,
-		displayWorld: state.displayWorld
+		displayWorld: state.displayWorld,
+		allWikis: state.allWikis,
+		pinBeingEdited: state.pinBeingEdited
 	}
 };
 
@@ -89,6 +100,9 @@ const mapDispatchToProps = dispatch => {
 		},
 		setDisplayWorld: (world) => {
 			dispatch(WorldActionFactory.displayWorld(world));
+		},
+		showEditPinModal: (show) => {
+			dispatch(UIActionFactory.showEditPinModal(show));
 		}
 	}
 };
