@@ -5,7 +5,6 @@ class LoginActionFactory{
 
 	static SET_CURRENT_USER = 'SET_CURRENT_USER';
 	static LOGIN_ERROR = 'LOGIN_ERROR';
-
 	static LOGOUT_ERROR = 'LOGOUT_ERROR';
 
 	static tryLogin(username, password) {
@@ -14,7 +13,6 @@ class LoginActionFactory{
 				await apiClient.login(username, password);
 				let user = await apiClient.getCurrentUser();
 				dispatch(this.loginSuccess(user));
-
 			} catch (error){
 				dispatch(this.createLoginErrorAction(error.message))
 			}

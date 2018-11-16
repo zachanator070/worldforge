@@ -10,7 +10,7 @@ class DefaultView extends Component {
 			<div className='padding-lg'> to create a world</div>
 		</div>;
 		if(this.props.currentUser){
-			loginPrompt = <div className='padding-lg'><Button type='primary' onClick={() => {this.props.showCreateWorldModal(true)}}>Create World</Button></div>
+			loginPrompt = <div><Button type='primary' onClick={() => {this.props.showCreateWorldModal(true)}}>Create World</Button></div>
 		}
 		return (
 			<div className='text-align-center'>

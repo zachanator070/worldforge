@@ -110,7 +110,10 @@ const mapDispatchToProps = dispatch => {
 		},
 		deletePin: (pin) => {
 			dispatch(MapActionFactory.deletePin(pin));
-		}
+		},
+		tryLogout: () => {
+			dispatch(LoginActionFactory.tryLogout());
+		},
 	}
 };
 

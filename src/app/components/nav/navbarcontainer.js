@@ -23,7 +23,7 @@ class NavBar extends Component {
 
 		if(this.props.currentUser){
 			loginOptions = (
-				<span>
+				<span style={{position: 'absolute', right: '0px'}}>
 					<span className='margin-md-right'>Hello {this.props.currentUser.displayName}</span>
 					<span>
 						<Button type='primary' onClick={this.props.dispatchTryLogout}>Logout</Button>
@@ -45,7 +45,7 @@ class NavBar extends Component {
 		return (
 			<div className='shadow-sm padding-sm nav-bar'>
 				<Row>
-					<Col span={2}>
+					<Col span={4}>
 						<div className='margin-md-left margin-sm-top'>
 							<WorldMenu
 								currentUser={this.props.currentUser}
@@ -64,7 +64,7 @@ class NavBar extends Component {
 							<Divider type='vertical'/>
 						</div>
 					</Col>
-					<Col span={14}>
+					<Col span={10}>
 						{this.props.currentWorld ?
 							<SearchBar
 								searchWikis={this.props.searchWikis}
@@ -78,7 +78,7 @@ class NavBar extends Component {
 						}
 
 					</Col>
-					<Col span={4}>
+					<Col span={6}>
 						{loginOptions}
 					</Col>
 				</Row>

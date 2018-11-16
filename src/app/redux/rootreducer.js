@@ -110,7 +110,8 @@ class RootReducer {
 		showCreateWorldModal: false,
 		showWorldPermissionModal: false,
 		showDrawer: false,
-		showEditPinModal: false
+		showEditPinModal: false,
+		mapUploadStatus: null,
 	}, action){
 		switch(action.type){
 			case UIActionFactory.SHOW_LOGIN_MODAL:
@@ -140,6 +141,14 @@ class RootReducer {
 			case UIActionFactory.SHOW_EDIT_PIN_MODAL:
 				return Object.assign({}, state, {
 					showEditPinModal: action.show
+				});
+			case UIActionFactory.SHOW_SESSION_TIMEOUT_MODAL:
+				return Object.assign({}, state, {
+					showEditPinModal: action.show
+				});
+			case UIActionFactory.SET_MAP_UPLOAD_STATUS:
+				return Object.assign({}, state, {
+					mapUploadStatus: action.status
 				});
 			default:
 				return state;
@@ -251,7 +260,7 @@ class RootReducer {
 			getAvailableWorldsRequest: this.availableWorldsRequestReducer,
 			createWorldRequest: this.createWorldReducer,
 			allWikis: this.allWikisReducer,
-			pinBeingEdited: this.pinBeingEditedReducer
+			pinBeingEdited: this.pinBeingEditedReducer,
 		});
 	}
 }

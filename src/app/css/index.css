@@ -187,3 +187,9 @@ div.ant-upload-list-item{
 	top: 15px;
 	background-color: white;
 }
+
+.map-upload{
+	width: 260px;
+	padding: 30px;
+	margin: auto;
+}

@@ -127,7 +127,7 @@ ImageRouter.post('/', passportConfig.loggedInMiddleware, (req, res, next) => {
 							if(err){
 								return res.status(500).json({error: err.message});
 							}
-							makeIcon(req).then((icon) => {
+							makeIcon(req, newImage._id).then((icon) => {
 								return res.redirect(303, `/api/images/${newImage._id}`);
 							}).catch((error) => {
 								return res.status(500).json({error: error.message});
@@ -166,14 +166,14 @@ ImageRouter.get('/:id', (req, res, next) => {
 	});
 });
 
-function makeIcon(req) {
+function makeIcon(req, newImageId) {
 	return new Promise((resolve, reject) => {
-		Image.findOne({_id: req.params.id}, (err, foundImage) => {
+		Image.findOne({_id: newImageId}, (err, foundImage) => {
 			if(err){
-				reject(err);
+				return reject(err);
 			}
 			if(!foundImage){
-				reject('Root image not found')
+				return reject(new Error('Root image not found'));
 			}
 			const gfs = Grid(mongoose.connection.db, mongoose.mongo);
 
@@ -200,7 +200,7 @@ function makeIcon(req) {
 						writeStream.on('close', (file) => {
 							Image.create(newImageSchema, (err, newImage) => {
 								if (err) {
-									reject(err);
+									return reject(err);
 								}
 								Chunk.create({
 									x: 0,
@@ -211,17 +211,17 @@ function makeIcon(req) {
 									image: newImage._id
 								}, (err, chunk) => {
 									if (err) {
-										reject(err);
+										return reject(err);
 									}
 									newImage.chunks = [chunk._id];
 									newImage.save((err) => {
 										if (err) {
-											reject(err);
+											return reject(err);
 										}
 										foundImage.icon = newImage._id;
 										foundImage.save((err) => {
 											if (err) {
-												reject(err);
+												return reject(err);
 											}
 											resolve(newImage);
 										});
@@ -230,14 +230,14 @@ function makeIcon(req) {
 							});
 						});
 						writeStream.on('error', function (err) {
-							reject(err);
+							return reject(err);
 						});
 						scaledImage.getBuffer(Jimp.AUTO, (err, buffer) => {
 							writeStream.end(buffer);
 						});
 					});
 				}).catch(err => {
-					reject(err);
+					return reject(err);
 				});
 		});
 	});

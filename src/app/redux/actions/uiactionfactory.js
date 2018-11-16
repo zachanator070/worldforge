@@ -13,6 +13,8 @@ class UIActionFactory {
 	static SHOW_CREATE_WORLD_MODAL = 'SHOW_CREATE_WORLD_MODAL';
 	static SHOW_DRAWER = 'SHOW_DRAWER';
 	static SHOW_EDIT_PIN_MODAL = 'SHOW_EDIT_PIN_MODAL';
+	static SET_MAP_UPLOAD_STATUS = 'SET_MAP_UPLOAD_STATUS';
+	static SHOW_SESSION_TIMEOUT_MODAL = 'SHOW_SESSION_TIMEOUT_MODAL';
 
 	static showLoginModal(show){
 		return {
@@ -151,6 +153,20 @@ class UIActionFactory {
 		return {
 			type: UIActionFactory.SHOW_EDIT_PIN_MODAL,
 			show: show
+		}
+	}
+
+	static showSessionTimeoutModal(show){
+		return {
+			type: UIActionFactory.SHOW_SESSION_TIMEOUT_MODAL,
+			show: show
+		}
+	}
+
+	static setMapUploadStatus(status){
+		return {
+			type: UIActionFactory.SET_MAP_UPLOAD_STATUS,
+			status: status
 		}
 	}
 }

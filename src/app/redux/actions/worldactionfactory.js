@@ -81,6 +81,7 @@ class WorldActionFactory {
 					type: LoginActionFactory.SET_CURRENT_USER,
 					user: newUser
 				});
+				dispatch(UIActionFactory.gotoPage('/ui/map', {world: world._id}))
 			} catch (error) {
 				dispatch(this.createWorldError(error.message || error.error))
 			}

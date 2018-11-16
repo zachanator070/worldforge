@@ -21,7 +21,12 @@ const port = process.env.API_PORT || 3000;
 const redisHost = process.env.REDIS_HOST || 'redis';
 
 app.use(morgan('tiny'));
-app.use(session({ store: new RedisStore({host: redisHost}), secret: 'super secret', cookie: {maxAge: 1000 * 60 * 5} }));
+app.use(session({
+	store: new RedisStore({host: redisHost}),
+	secret: process.env.SESSION_SECRET || uuidv4(),
+	rolling: true,
+	resave: true,
+}));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(passport.initialize());

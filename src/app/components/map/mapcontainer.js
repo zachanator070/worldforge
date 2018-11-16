@@ -55,7 +55,11 @@ class Map extends Component {
 		/>;
 
 		if(!this.props.currentMap.image){
-			canvas = <DefaultMapView/>;
+			canvas = <DefaultMapView
+				uploadImageFromMap={this.props.uploadImageFromMap}
+				ui={this.props.ui}
+				setMapUploadStatus={this.props.setMapUploadStatus}
+			/>;
 		}
 
 		return (
@@ -110,7 +114,7 @@ const mapDispatchToProps = dispatch => {
 			dispatch(MapActionFactory.setCurrentMapZoom(zoom));
 		},
 		createPin: (pin) => {
-			dispatch(MapActionFactory.createPin(pin))
+			dispatch(MapActionFactory.createPin(pin));
 		},
 		findAndSetDisplayWiki: (wikiId) => {
 			dispatch(WikiActionFactory.findAndSetDisplayWiki(wikiId));
@@ -120,6 +124,9 @@ const mapDispatchToProps = dispatch => {
 		},
 		setPinBeingEdited: (pin) => {
 			dispatch(MapActionFactory.setPinBeingEdited(pin));
+		},
+		setMapUploadStatus: (status) => {
+			dispatch(UIActionFactory.setMapUploadStatus(status));
 		}
 	}
 };

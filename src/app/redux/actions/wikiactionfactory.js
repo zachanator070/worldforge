@@ -27,13 +27,13 @@ class WikiActionFactory{
 	static uploadImageFromMap(file){
 		return async (dispatch, getState, {apiClient, history}) => {
 			const imageResponse = await apiClient.postImage(file);
-			const currentWorld = getState().currentWorld;
 			const worldWiki = getState().currentWorld.wikiPage;
 			worldWiki.mapImage = imageResponse._id;
 			const wikiResponse = await apiClient.updateWiki(worldWiki);
 			const newWorld = await apiClient.getWorld(getState().currentWorld._id);
 			dispatch(WorldActionFactory.setCurrentWorld(newWorld));
-			dispatch(UIActionFactory.gotoPage('/ui/map', {map: newWorld.wikiPage.mapImage._id}))
+			dispatch(UIActionFactory.gotoPage('/ui/map', {map: newWorld.wikiPage.mapImage._id}));
+			dispatch(UIActionFactory.setMapUploadStatus(null));
 		}
 	}
 

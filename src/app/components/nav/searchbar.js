@@ -40,13 +40,13 @@ class SearchBar extends Component{
 						onChange={event => this.search(event.target.value)}
 						onSearch={value => this.search(value)}
 						onClick={() => {if(this.props.wikiSearchResults.length > 0){this.setState({showResults: true})}}}
-						style={{ width: 200 }}
+						style={{ width: '80%' }}
 						type='text'
 					/>
 				</Row>
 				<Row>
-					<Col span={8}></Col>
-					<Col span={8} style={{display: this.state.showResults ? null : 'none'}}>
+					<Col span={4}></Col>
+					<Col span={16} style={{display: this.state.showResults ? null : 'none'}}>
 						<div
 							style={{position: 'relative', width: '100%'}}
 							className='searchResult'
@@ -81,7 +81,7 @@ class SearchBar extends Component{
 							</List>
 						</div>
 					</Col>
-					<Col span={8}></Col>
+					<Col span={4}></Col>
 				</Row>
 			</div>
 		);
