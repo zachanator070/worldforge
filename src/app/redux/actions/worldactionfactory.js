@@ -9,17 +9,19 @@ class WorldActionFactory {
 
 	static SET_CURRENT_WORLD = 'SET_CURRENT_WORLD';
 	static SET_AVAILABLE_WORLDS = 'SET_AVAILABLE_WORLDS';
-	static AVAILABLE_WORLDS_ERROR = 'AVAILABLE_WORLDS_ERROR';
-	static CREATE_WORLDS_ERROR = 'CREATE_WORLDS_ERROR';
 	static SET_DISPLAY_WORLD = 'SET_DISPLAY_WORLD';
 
 	static getAndSetCurrentWorld(worldId) {
 		return async (dispatch, getState, {apiClient, history}) => {
-			const world = await apiClient.getWorld(worldId).catch(err => {
-				dispatch(UIActionFactory.gotoPage('/ui', {}, true));
-			});
-			if(world !== undefined){
-				dispatch(WorldActionFactory.setCurrentWorld(world));
+			try{
+				const world = await apiClient.getWorld(worldId).catch(err => {
+					dispatch(UIActionFactory.gotoPage('/ui', {}, true));
+				});
+				if(world !== undefined){
+					dispatch(WorldActionFactory.setCurrentWorld(world));
+				}
+			} catch(e){
+				UIActionFactory.showError(e);
 			}
 		}
 	}
@@ -47,16 +49,9 @@ class WorldActionFactory {
 				}
 				dispatch(WorldActionFactory.setAvailableWorlds(worlds));
 			} catch (error){
-				dispatch(WorldActionFactory.fetchWorldsError(error.message))
+				UIActionFactory.showError(error);
 			}
 
-		}
-	}
-
-	static fetchWorldsError(error){
-		return {
-			type: WorldActionFactory.AVAILABLE_WORLDS_ERROR,
-			error: error
 		}
 	}
 
@@ -83,16 +78,9 @@ class WorldActionFactory {
 				});
 				dispatch(UIActionFactory.gotoPage('/ui/map', {world: world._id}))
 			} catch (error) {
-				dispatch(this.createWorldError(error.message || error.error))
+				UIActionFactory.showError(error);
 			}
 		};
-	}
-
-	static createWorldError(error){
-		return {
-			type: WorldActionFactory.CREATE_WORLDS_ERROR,
-			error: error
-		}
 	}
 
 	static displayWorld(world){

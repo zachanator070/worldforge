@@ -63,7 +63,7 @@ class ApiClient {
 				},
 			}
 		);
-		return response.status === 200;
+		return await this.checkForGoodResponse(response);
 	}
 
 	async fetchAvailableWorlds() {
@@ -201,7 +201,7 @@ class ApiClient {
 				method: 'DELETE',
 			}
 		);
-		return response.status === 200;
+		return await this.checkForGoodResponse(response);
 	}
 
 	async jsonOrError(response){

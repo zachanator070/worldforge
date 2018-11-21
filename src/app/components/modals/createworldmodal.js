@@ -20,10 +20,6 @@ class CreateWorldModal extends Component {
 	};
 
 	render(){
-		let errorRow = <Row></Row>;
-		if(this.props.error){
-			errorRow = <Row><Col span={24}>{this.props.error}</Col></Row>
-		}
 		const formItemLayout = {
 			labelCol: { span: 4 },
 			wrapperCol: { span: 14 },
@@ -38,7 +34,6 @@ class CreateWorldModal extends Component {
 				onCancel={() => {this.props.showCreateWorldModal(false)}}
 				footer={null}
 			>
-				{errorRow}
 				<Form layout='horizontal'>
 					<Form.Item
 						label="Name"

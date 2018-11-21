@@ -23,32 +23,6 @@ class RootReducer {
 		}
 	}
 
-	loggedInReducer(state = {
-		error: null,
-	}, action) {
-		switch (action.type) {
-			case LoginActionFactory.LOGIN_ERROR:
-				return Object.assign({}, state, {
-					error: action.error
-				});
-			default:
-				return state
-		}
-	}
-
-	registerReducer(state = {
-		error: null,
-	}, action){
-		switch(action.type){
-			case RegisterActionFactory.REGISTER_ERROR:
-				return Object.assign({}, state, {
-					error: action.error
-				});
-			default:
-				return state
-		}
-	}
-
 	currentWorldReducer(state = null, action){
 		switch(action.type) {
 			case WorldActionFactory.SET_CURRENT_WORLD:
@@ -69,36 +43,10 @@ class RootReducer {
 		}
 	}
 
-	availableWorldsRequestReducer(state = {
-		error: null,
-	}, action){
-		switch(action.type) {
-			case WorldActionFactory.AVAILABLE_WORLDS_ERROR:
-				return Object.assign({}, state, {
-					error: action.error
-				});
-			default:
-				return state;
-		}
-	}
-
 	availableWorldsReducer(state = null, action){
 		switch(action.type) {
 			case WorldActionFactory.SET_AVAILABLE_WORLDS:
 				return action.availableWorlds;
-			default:
-				return state;
-		}
-	}
-
-	createWorldReducer(state = {
-		error: null,
-	}, action){
-		switch(action.type){
-			case WorldActionFactory.CREATE_WORLDS_ERROR:
-				return Object.assign({}, state, {
-					error: action.error
-				});
 			default:
 				return state;
 		}
@@ -281,10 +229,6 @@ class RootReducer {
 			displayWiki: this.displayWikiReducer,
 			displayWorld: this.displayWorldReducer,
 			availableWorlds: this.availableWorldsReducer,
-			loginRequest: this.loggedInReducer,
-			registerRequest: this.registerReducer,
-			getAvailableWorldsRequest: this.availableWorldsRequestReducer,
-			createWorldRequest: this.createWorldReducer,
 			allWikis: this.allWikisReducer,
 			pinBeingEdited: this.pinBeingEditedReducer,
 			currentGame: this.currentGameReducer,

@@ -12,8 +12,12 @@ class WikiActionFactory{
 
 	static getAndSetWiki(wikiId){
 		return async (dispatch, getState, {apiClient, history}) => {
-			const wiki = await apiClient.getWiki(wikiId);
-			dispatch(WikiActionFactory.setCurrentWiki(wiki));
+			try{
+				const wiki = await apiClient.getWiki(wikiId);
+				dispatch(WikiActionFactory.setCurrentWiki(wiki));
+			} catch(e){
+				UIActionFactory.showError(e);
+			}
 		}
 	}
 
@@ -26,128 +30,165 @@ class WikiActionFactory{
 
 	static uploadImageFromMap(file){
 		return async (dispatch, getState, {apiClient, history}) => {
-			const imageResponse = await apiClient.postImage(file);
-			const worldWiki = getState().currentWorld.wikiPage;
-			worldWiki.mapImage = imageResponse._id;
-			const wikiResponse = await apiClient.updateWiki(worldWiki);
-			const newWorld = await apiClient.getWorld(getState().currentWorld._id);
-			dispatch(WorldActionFactory.setCurrentWorld(newWorld));
-			dispatch(UIActionFactory.gotoPage('/ui/map', {map: newWorld.wikiPage.mapImage._id}));
-			dispatch(UIActionFactory.setMapUploadStatus(null));
+			try{
+				const imageResponse = await apiClient.postImage(file);
+				const worldWiki = getState().currentWorld.wikiPage;
+				worldWiki.mapImage = imageResponse._id;
+				const wikiResponse = await apiClient.updateWiki(worldWiki);
+				const newWorld = await apiClient.getWorld(getState().currentWorld._id);
+				dispatch(WorldActionFactory.setCurrentWorld(newWorld));
+				dispatch(UIActionFactory.gotoPage('/ui/map', {map: newWorld.wikiPage.mapImage._id}));
+				dispatch(UIActionFactory.setMapUploadStatus(null));
+			} catch(e){
+				UIActionFactory.showError(e);
+			}
 		}
 	}
 
 	static createWiki(name, type, folder){
 		return async (dispatch, getState, {apiClient, history}) => {
-			const newWiki = await apiClient.createWikiPage(name, getState().currentWorld._id, type);
-			folder.pages.push(newWiki);
-			await apiClient.updateFolder(folder);
-			const world = await apiClient.getWorld(getState().currentWorld._id);
-			dispatch({
-				type: WorldActionFactory.SET_CURRENT_WORLD,
-				currentWorld: world
-			});
-			dispatch(UIActionFactory.gotoPage('/ui/wiki/view', {wiki: newWiki._id}));
+			try{
+				const newWiki = await apiClient.createWikiPage(name, getState().currentWorld._id, type);
+				folder.pages.push(newWiki);
+				await apiClient.updateFolder(folder);
+				const world = await apiClient.getWorld(getState().currentWorld._id);
+				dispatch({
+					type: WorldActionFactory.SET_CURRENT_WORLD,
+					currentWorld: world
+				});
+				dispatch(UIActionFactory.gotoPage('/ui/wiki/view', {wiki: newWiki._id}));
+			} catch(e){
+				UIActionFactory.showError(e);
+			}
 		}
 	}
 
 	static saveWiki(name, type, coverToUpload, mapToUpload, content){
 		return async (dispatch, getState, {apiClient, history}) => {
-			const toUpdate = Object.assign({}, getState().currentWiki);
+			try{
+				const toUpdate = Object.assign({}, getState().currentWiki);
 				toUpdate.name = name;
 				toUpdate.type = type;
 				toUpdate.content = content;
-			if (coverToUpload){
-				const coverResponse = await apiClient.postImage(coverToUpload, false);
-				toUpdate.coverImage = coverResponse._id;
+				if (coverToUpload){
+					const coverResponse = await apiClient.postImage(coverToUpload, false);
+					toUpdate.coverImage = coverResponse._id;
+				}
+				if(coverToUpload === null) {
+					toUpdate.coverImage = null;
+				}
+				if (mapToUpload){
+					const mapResponse = await apiClient.postImage(mapToUpload);
+					toUpdate.mapImage = mapResponse._id;
+				}
+				if(mapToUpload === null) {
+					toUpdate.mapImage = null;
+				}
+				const updatedWiki = await apiClient.updateWiki(toUpdate);
+				if(name !== getState().currentWiki.name){
+					await dispatch(WorldActionFactory.getAndSetCurrentWorld(getState().currentWorld._id));
+				}
+				dispatch(WikiActionFactory.setCurrentWiki(updatedWiki));
+				if(name === getState().currentWorld.name){
+					await dispatch(WorldActionFactory.getAndSetCurrentWorld(getState().currentWorld._id));
+				}
+				if(updatedWiki.mapImage && updatedWiki.mapImage._id === getState().currentMap._id){
+					await dispatch(WorldActionFactory.getAndSetMap(getState().currentMap._id));
+				}
+				dispatch(UIActionFactory.gotoPage('/ui/wiki/view'));
+			} catch(e){
+				UIActionFactory.showError(e);
 			}
-			if(coverToUpload === null) {
-				toUpdate.coverImage = null;
-			}
-			if (mapToUpload){
-				const mapResponse = await apiClient.postImage(mapToUpload);
-				toUpdate.mapImage = mapResponse._id;
-			}
-			if(mapToUpload === null) {
-				toUpdate.mapImage = null;
-			}
-			const updatedWiki = await apiClient.updateWiki(toUpdate);
-			if(name !== getState().currentWiki.name){
-				await dispatch(WorldActionFactory.getAndSetCurrentWorld(getState().currentWorld._id));
-			}
-			dispatch(WikiActionFactory.setCurrentWiki(updatedWiki));
-			if(name === getState().currentWorld.name){
-				await dispatch(WorldActionFactory.getAndSetCurrentWorld(getState().currentWorld._id));
-			}
-			if(updatedWiki.mapImage && updatedWiki.mapImage._id === getState().currentMap._id){
-				await dispatch(WorldActionFactory.getAndSetMap(getState().currentMap._id));
-			}
-			dispatch(UIActionFactory.gotoPage('/ui/wiki/view'));
+
 		}
 	}
 
 	static updateFolder(folder){
 		return async (dispatch, getState, {apiClient, history}) => {
-			await apiClient.updateFolder(folder);
-			const world = await apiClient.getWorld(getState().currentWorld._id);
-			dispatch({
-				type: WorldActionFactory.SET_CURRENT_WORLD,
-				currentWorld: world
-			});
+			try{
+				await apiClient.updateFolder(folder);
+				const world = await apiClient.getWorld(getState().currentWorld._id);
+				dispatch({
+					type: WorldActionFactory.SET_CURRENT_WORLD,
+					currentWorld: world
+				});
+			} catch(e){
+				UIActionFactory.showError(e);
+			}
 		}
 	}
 
 	static createFolder(parent, folder){
 		return async (dispatch, getState, {apiClient, history}) => {
-			const createdFolder = await apiClient.createFolder(folder);
-			parent.children.push(createdFolder._id);
-			await apiClient.updateFolder(parent);
-			const world = await apiClient.getWorld(getState().currentWorld._id);
-			dispatch({
-				type: WorldActionFactory.SET_CURRENT_WORLD,
-				currentWorld: world
-			});
+			try{
+				const createdFolder = await apiClient.createFolder(folder);
+				parent.children.push(createdFolder._id);
+				await apiClient.updateFolder(parent);
+				const world = await apiClient.getWorld(getState().currentWorld._id);
+				dispatch({
+					type: WorldActionFactory.SET_CURRENT_WORLD,
+					currentWorld: world
+				});
+			} catch(e){
+				UIActionFactory.showError(e);
+			}
 		}
 	}
 
 	static deleteFolder(folder){
 		return async (dispatch, getState, {apiClient, history}) => {
-			await apiClient.deleteFolder(folder);
-			const world = await apiClient.getWorld(getState().currentWorld._id);
-			dispatch({
-				type: WorldActionFactory.SET_CURRENT_WORLD,
-				currentWorld: world
-			});
+			try{
+				await apiClient.deleteFolder(folder);
+				const world = await apiClient.getWorld(getState().currentWorld._id);
+				dispatch({
+					type: WorldActionFactory.SET_CURRENT_WORLD,
+					currentWorld: world
+				});
+			} catch(e){
+				UIActionFactory.showError(e);
+			}
 		}
 	}
 
 	static searchWikis(params){
 		return async (dispatch, getState, {apiClient, history}) => {
-			const results = await apiClient.searchWikis(params);
-			dispatch({
-				type: WikiActionFactory.SET_WIKI_SEARCH_RESULTS,
-				results: results
-			});
+			try{
+				const results = await apiClient.searchWikis(params);
+				dispatch({
+					type: WikiActionFactory.SET_WIKI_SEARCH_RESULTS,
+					results: results
+				});
+			} catch(e){
+				UIActionFactory.showError(e);
+			}
 		}
 	}
 
 	static getAllWikis(){
 		return async (dispatch, getState, {apiClient, history}) => {
-			const results = await apiClient.searchWikis({world: getState().currentWorld._id});
-			dispatch({
-				type: WikiActionFactory.SET_ALL_WIKIS,
-				results: results
-			});
+			try{
+				const results = await apiClient.searchWikis({world: getState().currentWorld._id});
+				dispatch({
+					type: WikiActionFactory.SET_ALL_WIKIS,
+					results: results
+				});
+			} catch(e){
+				UIActionFactory.showError(e);
+			}
 		}
 	}
 
 	static findAndSetDisplayWiki(wikiId){
 		return async (dispatch, getState, {apiClient, history}) => {
-			const wiki = await apiClient.getWiki(wikiId);
-			dispatch({
-				type: WikiActionFactory.SET_DISPLAY_WIKI,
-				wiki: wiki
-			});
+			try{
+				const wiki = await apiClient.getWiki(wikiId);
+				dispatch({
+					type: WikiActionFactory.SET_DISPLAY_WIKI,
+					wiki: wiki
+				});
+			} catch(e){
+				UIActionFactory.showError(e);
+			}
 		}
 	}
 

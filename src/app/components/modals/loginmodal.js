@@ -7,8 +7,7 @@ class LoginModal extends Component {
 		super(props);
 		this.state = {
 			email: '',
-			password: '',
-			error: '',
+			password: ''
 		};
 	}
 
@@ -27,10 +26,6 @@ class LoginModal extends Component {
 	};
 
 	render() {
-		let errorBox = <div></div>;
-		if(this.props.error){
-			errorBox = <div>{this.props.error}</div>;
-		}
 		const formItemLayout = {
 			labelCol: { span: 5 },
 			wrapperCol: { span: 14 },
@@ -47,7 +42,6 @@ class LoginModal extends Component {
 					onCancel={this.props.cancel}
 					footer={null}
 				>
-					{errorBox}
 					<Form layout='horizontal' onSubmit={() => {this.props.login(this.state.email, this.state.password)}}>
 						<Form.Item
 							label="Email"

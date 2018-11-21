@@ -10,5 +10,5 @@ down:
 logs:
 	docker-compose logs -f
 
-reset:
-	docker-compose reset
+restart:
+	docker-compose restart

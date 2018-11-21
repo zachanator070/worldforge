@@ -9,7 +9,6 @@ class RegisterModal extends Component {
 			email: '',
 			password: '',
 			repeatPassword: '',
-			error: '',
 			displayName: ''
 		};
 	}
@@ -43,10 +42,6 @@ class RegisterModal extends Component {
 	};
 
 	render() {
-		let errorBox = <div></div>;
-		if(this.props.error){
-			errorBox = <div>{this.props.error}</div>;
-		}
 
 		const formItemLayout = {
 			labelCol: { span: 5 },
@@ -65,7 +60,6 @@ class RegisterModal extends Component {
 					onCancel={this.props.cancel}
 					footer={null}
 				>
-					{errorBox}
 					<Form layout='horizontal' onSubmit={() => {this.props.register(this.state.email, this.state.password, this.state.displayName)}}>
 						<Form.Item label="Email" {...formItemLayout}>
 							<Input

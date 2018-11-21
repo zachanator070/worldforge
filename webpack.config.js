@@ -29,7 +29,12 @@ module.exports = {
 					loader: "babel-loader",
 					options: {
 						"presets": [
-							"@babel/env",
+							[
+								"@babel/preset-env",
+								{
+									"targets": "> 0.25%, not dead"
+								}
+							],
 							"@babel/react"
 						],
 						"plugins": [

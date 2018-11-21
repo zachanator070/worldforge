@@ -3,6 +3,7 @@ import queryString from "query-string";
 import LoginActionFactory from "./loginactionfactory";
 import MapActionFactory from "./mapactionfactory";
 import WikiActionFactory from "./wikiactionfactory";
+import {message} from "antd";
 
 class UIActionFactory {
 
@@ -46,18 +47,22 @@ class UIActionFactory {
 
 	static submitSelectWorldModal(worldId){
 		return async (dispatch, getState, {apiClient, history}) => {
+			try{
+				let world = await apiClient.getWorld(worldId);
 
-			let world = await apiClient.getWorld(worldId);
-
-			if(getState().currentUser && world && getState().currentUser.currentWorld !== world._id){
-				const newUser = await apiClient.setCurrentWorld(world);
-				dispatch({
-					type: LoginActionFactory.SET_CURRENT_USER,
-					user: newUser
-				});
+				if(getState().currentUser && world && getState().currentUser.currentWorld !== world._id){
+					const newUser = await apiClient.setCurrentWorld(world);
+					dispatch({
+						type: LoginActionFactory.SET_CURRENT_USER,
+						user: newUser
+					});
+				}
+				dispatch(UIActionFactory.showSelectWorldModal(false));
+				dispatch(UIActionFactory.gotoPage('/ui/map', {world: world._id}, true));
+			} catch(e){
+				UIActionFactory.showError(e);
 			}
-			dispatch(UIActionFactory.showSelectWorldModal(false));
-			dispatch(UIActionFactory.gotoPage('/ui/map', {world: world._id}, true));
+
 		}
 	}
 
@@ -118,30 +123,6 @@ class UIActionFactory {
 		}
 	}
 
-	static redirectAfterWorldChange(){
-		return async (dispatch, getState, {apiClient, history}) => {
-
-			if(getState().currentWorld){
-				if(history.location.pathname === '/ui/' || history.location.pathname === '/ui/map/'){
-					if(getState().currentWorld.wikiPage.mapImage){
-						dispatch(UIActionFactory.gotoPage('/ui/map/',{world: getState().currentWorld._id, map: getState().currentWorld.wikiPage.mapImage._id}, true));
-					}
-					else{
-						dispatch(UIActionFactory.gotoPage('/ui/map/',{world: getState().currentWorld._id}, true));
-					}
-				}
-				else{
-					dispatch(UIActionFactory.gotoPage(history.location.pathname, {world: getState().currentWorld._id}, true));
-				}
-
-			}
-			else {
-				// clear url params if we are clearing current world
-				dispatch(UIActionFactory.gotoPage(history.location.pathname, {}, true));
-			}
-		}
-	}
-
 	static showDrawer(show){
 		return {
 			type: UIActionFactory.SHOW_DRAWER,
@@ -156,18 +137,15 @@ class UIActionFactory {
 		}
 	}
 
-	static showSessionTimeoutModal(show){
-		return {
-			type: UIActionFactory.SHOW_SESSION_TIMEOUT_MODAL,
-			show: show
-		}
-	}
-
 	static setMapUploadStatus(status){
 		return {
 			type: UIActionFactory.SET_MAP_UPLOAD_STATUS,
 			status: status
 		}
+	}
+
+	static showError(error){
+		message.error(error.message || error.error);
 	}
 }
 
