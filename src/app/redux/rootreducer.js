@@ -4,6 +4,7 @@ import WorldActionFactory from "./actions/worldactionfactory";
 import UIActionFactory from "./actions/uiactionfactory";
 import WikiActionFactory from "./actions/wikiactionfactory";
 import MapActionFactory from "./actions/mapactionfactory";
+import GameActionFactory from "./actions/gameactionfactory";
 
 class RootReducer {
 
@@ -244,6 +245,31 @@ class RootReducer {
 		}
 	}
 
+	currentGameReducer(state = {
+		game: null,
+		x: 0,
+		y: 0,
+		zoom: 1
+	}, action){
+		switch(action.type){
+			case GameActionFactory.SET_GAME:
+				return Object.assign({}, state, {
+					game: action.game
+				});
+			case GameActionFactory.SET_GAME_MAP_POSITION:
+				return Object.assign({}, state, {
+					x: action.x,
+					y: action.y
+				});
+			case GameActionFactory.SET_GAME_MAP_ZOOM:
+				return Object.assign({}, state, {
+					zoom: action.zoom
+				});
+			default:
+				return state;
+		}
+	}
+
 	getCombinedReducers() {
 		return this.combineReducers({
 			currentUser: this.currentUserReducer,
@@ -261,6 +287,7 @@ class RootReducer {
 			createWorldRequest: this.createWorldReducer,
 			allWikis: this.allWikisReducer,
 			pinBeingEdited: this.pinBeingEditedReducer,
+			currentGame: this.currentGameReducer,
 		});
 	}
 }

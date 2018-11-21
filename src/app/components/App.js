@@ -12,6 +12,7 @@ import WorldActionFactory from "../redux/actions/worldactionfactory";
 import DefaultViewContainer from './defaultviewcontainer';
 import WikiContainer from "./wiki/wikicontainer";
 import MapContainer from "./map/mapcontainer";
+import GameContainer from "./game/gamecontainer";
 
 class App extends Component {
 
@@ -42,6 +43,7 @@ class App extends Component {
 					<Switch>
 						<Route path="/ui/wiki" render={() => {return this.wrapHeader(<WikiContainer/>)}}/>
 						<Route path="/ui/map" render={() => {return this.wrapHeader(<MapContainer/>)}}/>
+						<Route path="/ui/game" render={() => {return this.wrapHeader(<GameContainer/>)}}/>
 						<Route path="/" render={() => {return this.wrapHeader(<DefaultViewContainer/>)}}/>
 					</Switch>
 				</Router>
@@ -52,7 +54,6 @@ class App extends Component {
 const mapStateToProps = state => {
 	return {
 		currentUser: state.currentUser,
-		currentWorld: state.currentWorld
 	}
 };
 
@@ -60,9 +61,6 @@ const mapDispatchToProps = dispatch => {
 	return {
 		dispatchResumeSession: () => {
 			dispatch(LoginActionFactory.resumeSession())
-		},
-		fetchAvailableWorlds: () => {
-			dispatch(WorldActionFactory.fetchAvailableWorlds());
 		}
 	}
 };

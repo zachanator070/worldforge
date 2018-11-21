@@ -10,7 +10,7 @@ module.exports = {
 	plugins: [
 		new CleanWebpackPlugin(['dist']),
 		new HtmlWebpackPlugin({
-			title: 'rptools',
+			title: 'worldforge',
 			template: __dirname + "/src/app/index.html"
 		})
 	],

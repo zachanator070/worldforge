@@ -32,7 +32,7 @@ class LoginModal extends Component {
 			errorBox = <div>{this.props.error}</div>;
 		}
 		const formItemLayout = {
-			labelCol: { span: 4 },
+			labelCol: { span: 5 },
 			wrapperCol: { span: 14 },
 		};
 		const noLabelItem = {

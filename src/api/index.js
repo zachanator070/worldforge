@@ -15,10 +15,18 @@ passportConfig.setupPassport();
 
 const morgan = require('morgan');
 
-let app = express();
-const port = process.env.API_PORT || 3000;
-
 const redisHost = process.env.REDIS_HOST || 'redis';
+
+let app = express();
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+const redisAdapter = require('socket.io-redis');
+io.adapter(redisAdapter({ host: redisHost}));
+const GameServerSocket = require('./gameserversocket');
+const gameSocket = new GameServerSocket(io);
+gameSocket.setup();
+
+const port = process.env.API_PORT || 3000;
 
 app.use(morgan('tiny'));
 app.use(session({
@@ -57,4 +65,4 @@ app.use('/api/chunks', ChunkRouter);
 app.use('/api/wikiFolders', WikiFolderRouter);
 app.use('/api/pins', PinRouter);
 
-app.listen(port, () => console.log(`listening on port ${port}`));
+server.listen(port, () => console.log(`listening on port ${port}`));

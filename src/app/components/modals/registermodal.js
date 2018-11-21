@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Button, Icon, Input, Modal} from "antd";
+import {Button, Form, Icon, Input, Modal} from "antd";
 
 class RegisterModal extends Component {
 
@@ -47,6 +47,15 @@ class RegisterModal extends Component {
 		if(this.props.error){
 			errorBox = <div>{this.props.error}</div>;
 		}
+
+		const formItemLayout = {
+			labelCol: { span: 5 },
+			wrapperCol: { span: 14 },
+		};
+		const noLabelItem = {
+			wrapperCol: { span: 10, offset: 4 }
+		};
+
 		return (
 			<div>
 				<Modal
@@ -54,56 +63,46 @@ class RegisterModal extends Component {
 					visible={this.props.show}
 					centered
 					onCancel={this.props.cancel}
-					footer={[
-						<Button type='primary' key='register' onClick={() => {this.props.register(this.state.email, this.state.password, this.state.displayName)}}>Register</Button>
-					]}
+					footer={null}
 				>
 					{errorBox}
-					<form>
-						<div className='text-align-right'>
-							Email:
-							<div className='margin-sm width-65 inline-block'>
-								<Input
-									className='width-65'
-									placeholder="zach@thezachcave.com"
-									prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />}
-									value={this.state.email}
-									onChange={this.updateEmail}/>
-							</div>
-						</div>
-						<div className='text-align-right'>
-							Display Name:
-							<div className='margin-sm width-65 inline-block'>
-								<Input
-									className='width-65'
-									placeholder="DragonSlayer1234"
-									prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />}
-									value={this.state.displayName}
-									onChange={this.updateDisplayName}/>
-							</div>
-						</div>
-						<div className='text-align-right'>
-							Password:
-							<div className='margin-sm width-65 inline-block'>
-								<Input
-									placeholder="$up3r$3cr37"
-									prefix={<Icon type="key" style={{ color: 'rgba(0,0,0,.25)' }} />}
-									value={this.state.password}
-									onChange={this.updatePassword}
-									type='password'/>
-								</div>
-						</div>
-						<div className='text-align-right'>
-							Repeat Password:
-							<div className='margin-sm width-65 inline-block'>
-								<Input placeholder="$up3r$3cr37"
-									   prefix={<Icon type="key" style={{ color: 'rgba(0,0,0,.25)' }} />}
-									   value={this.state.repeatPassword}
-									   onChange={this.updateRepeatPassword}
-									   type='password'/>
-							</div>
-						</div>
-					</form>
+					<Form layout='horizontal' onSubmit={() => {this.props.register(this.state.email, this.state.password, this.state.displayName)}}>
+						<Form.Item label="Email" {...formItemLayout}>
+							<Input
+								placeholder="zach@thezachcave.com"
+								prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />}
+								value={this.state.email}
+								onChange={this.updateEmail}
+							/>
+						</Form.Item>
+						<Form.Item label="Display Name" {...formItemLayout}>
+							<Input
+								placeholder="DragonSlayer1234"
+								prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
+								value={this.state.displayName}
+								onChange={this.updateDisplayName}
+							/>
+						</Form.Item>
+						<Form.Item label="Password" {...formItemLayout} >
+							<Input
+								placeholder="$up3r$3cr37"
+								prefix={<Icon type="key" style={{ color: 'rgba(0,0,0,.25)' }} />}
+								value={this.state.password}
+								onChange={this.updatePassword}
+								type='password'/>
+						</Form.Item>
+						<Form.Item label="Password" {...formItemLayout} >
+							<Input
+								placeholder="$up3r$3cr37"
+								prefix={<Icon type="key" style={{ color: 'rgba(0,0,0,.25)' }} />}
+								value={this.state.repeatPassword}
+								onChange={this.updateRepeatPassword}
+								type='password'/>
+						</Form.Item>
+						<Form.Item {...noLabelItem}>
+							<Button type="primary" htmlType="submit">Register</Button>
+						</Form.Item>
+					</Form>
 				</Modal>
 			</div>
 		);

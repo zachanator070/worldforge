@@ -62,6 +62,8 @@ class NavBar extends Component {
 							<Divider type='vertical'/>
 							<a href='#' onClick={() => {this.props.gotoPage('/ui/wiki/view')}}>Wiki</a>
 							<Divider type='vertical'/>
+							<a href='#' onClick={() => {this.props.gotoPage('/ui/game')}}>Game</a>
+							<Divider type='vertical'/>
 						</div>
 					</Col>
 					<Col span={10}>

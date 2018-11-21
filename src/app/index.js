@@ -10,16 +10,22 @@ import thunk from 'redux-thunk';
 import ApiClient from "./apiclient";
 import { createBrowserHistory } from 'history';
 import { composeWithDevTools } from 'redux-devtools-extension';
+import io from 'socket.io-client';
+import GameSocket from "./gamesocket";
 
 const apiClient = new ApiClient();
 const rootReducer = new RootReducer(combineReducers);
 const history = createBrowserHistory();
+const socket = io();
 const store = createStore(
 	rootReducer.getCombinedReducers(),
 	composeWithDevTools(
-		applyMiddleware(thunk.withExtraArgument({ apiClient, history}))
+		applyMiddleware(thunk.withExtraArgument({ apiClient, history, socket}))
 	)
 );
+
+const gameSocket = new GameSocket(socket, store);
+gameSocket.initialize();
 
 const app = (
 	<Provider store={store}>
