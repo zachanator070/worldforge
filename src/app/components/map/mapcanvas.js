@@ -36,20 +36,22 @@ class MapCanvas extends Component {
 			canvas.removeEventListener('mousemove', this.updateMapPosition);
 		}, false);
 
+		this.calcDefaultPosition();
+	}
+
+	componentDidUpdate(prevProps, prevState, snapshot) {
+		if(this.props.currentMap.zoom === 0 || prevProps.currentMap.image._id !== this.props.currentMap.image._id){
+			this.calcDefaultPosition();
+		}
+	}
+
+	calcDefaultPosition = () => {
 		let smallestRatio = this.props.width / this.props.currentMap.image.width;
 		if(this.props.height / this.props.currentMap.image.height < smallestRatio){
 			smallestRatio = this.props.height / this.props.currentMap.image.height;
 		}
 		this.props.setCurrentMapZoom(smallestRatio);
 		this.props.setCurrentMapPosition(-this.props.currentMap.image.width/2, -this.props.currentMap.image.height/2);
-	}
-
-	clip = (x, y, width, height) => {
-		let clip = x > this.props.width;
-		clip = clip || x + width < 0;
-		clip = clip || y > this.props.height;
-		clip = clip || y + height < 0;
-		return clip;
 	};
 
 	handleWheelEvent = (event) => {
@@ -82,9 +84,8 @@ class MapCanvas extends Component {
 
 	};
 
-	render(){
-		const images = [];
-
+	getChunks = () => {
+		let chunks = [];
 		for (let chunk of this.props.currentMap.chunks){
 
 			const coordinates = this.translate(chunk.x * 250, chunk.y * 250);
@@ -99,7 +100,7 @@ class MapCanvas extends Component {
 			height *= this.props.currentMap.zoom;
 			height = Math.ceil(height);
 
-			images.push(
+			chunks.push(
 				<img
 					key={chunk._id}
 					src={`/api/chunks/data/${chunk._id}`}
@@ -108,58 +109,42 @@ class MapCanvas extends Component {
 					className='map-tile'
 				/>
 			);
-
 		}
+		return chunks;
+	};
 
-		for (let pin of this.props.currentMap.pins){
-
-			const coordinates = this.translate(pin.x, pin.y);
-			const x = coordinates[0];
-			const y = coordinates[1];
-
-			const editButton = this.props.currentWorld && this.props.currentWorld.canWrite ?
-				<a href='#' className='margin-md-left' onClick={() => {
-					this.props.setPinBeingEdited(pin);
-					this.props.showEditPinModal(true);
-				}}>Edit Pin</a>
-				: null;
-
-			let pinPopupContent = <div>
-				<h2>Empty Pin</h2>
-				{editButton}
-			</div>;
-
-			if(pin.page){
-				pinPopupContent = <div>
-					<h2>{pin.page.name}</h2>
-					<h3>{pin.page.type}</h3>
-					<a href='#' onClick={() => {
-						this.props.findAndSetDisplayWiki(pin.page._id);
-						this.props.showDrawer(true);
-					}}>Details</a>
-					{pin.page.type === 'place' && pin.page.mapImage ? <a className='margin-md-left' href='#' onClick={() => {this.props.gotoPage('/ui/map', {map: pin.page.mapImage})}}>Open Map</a> : null }
-					{editButton}
-				</div>;
-			}
-
-			images.push(
-				<Popover
-					content={pinPopupContent}
-					trigger="click"
-					key={pin._id}
-					overlayStyle={{zIndex: '1'}}
-				>
-					<Icon
-						type="pushpin"
-						style={{position: 'absolute', left: x, top: y - 50, fontSize: '50px', zIndex:3, color:'red'}}
-						theme='filled'
-						draggable="false"
-					/>
-				</Popover>
-
+	getDropdownMenu = () => {
+		const menuItems = [];
+		for(let item of this.props.menuItems){
+			menuItems.push(
+				<Menu.Item key={item.name} onClick={() => {
+					item.onClick(this.state.lastMouseX, this.state.lastMouseY);
+				}}>{item.name}</Menu.Item>
 			);
-
 		}
+
+		return menuItems;
+	};
+
+	render(){
+		if(!this.props.currentMap){
+			return <div>No Current Map</div>;
+		}
+		if(!this.props.currentWorld){
+			return <div>No Current World</div>;
+		}
+		let images = this.getChunks();
+
+		const extras = [];
+
+		for(let extra of this.props.extras){
+			const coords = this.translate(extra.x, extra.y);
+			extras.push(
+				extra.render(coords[0], coords[1])
+			);
+		}
+
+		images = images.concat(extras);
 
 		let canvas =
 			<div
@@ -170,25 +155,23 @@ class MapCanvas extends Component {
 			>
 				{images}
 			</div>;
-		if(this.props.currentWorld && this.props.currentWorld.canWrite){
-			canvas = <Dropdown
-				overlay={
-					<Menu >
-						<Menu.Item key='new pin' onClick={() => {
-							let pin = {
-								x: (this.state.lastMouseX - this.props.width / 2 ) / this.props.currentMap.zoom - this.props.currentMap.x,
-								y: (this.state.lastMouseY - 42 - this.props.height / 2 ) / this.props.currentMap.zoom - this.props.currentMap.y,
-								world: this.props.currentWorld._id,
-								map: this.props.currentMap.image._id
-							};
-							this.props.createPin(pin);
-						}}>New Pin</Menu.Item>
-					</Menu>
-				}
-				trigger={['contextMenu']}
-			>
-				{canvas}
-			</Dropdown>;
+
+		if(this.props.currentWorld.canWrite){
+
+			const menuItems = this.getDropdownMenu();
+
+			if(menuItems.length > 0){
+				canvas = <Dropdown
+					overlay={
+						<Menu>
+							{menuItems}
+						</Menu>
+					}
+					trigger={['contextMenu']}
+				>
+					{canvas}
+				</Dropdown>;
+			}
 		}
 		return canvas;
 	}

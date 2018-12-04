@@ -35,7 +35,7 @@ WikiFolderRouter.put('/:id', passportConfig.loggedInMiddleware, (req, res, next)
 			return res.status(403).json({error: 'Unauthorized'});
 		}
 
-		WikiFolder.findOneAndUpdate({_id: req.params.id}, { $set: req.body}).exec((err, folder) => {
+		WikiFolder.findOneAndUpdate({_id: req.params.id}, { $set: req.body}, {new: true}).exec((err, folder) => {
 			res.redirect(303, `/api/wikiFolders/${folder._id}`);
 		});
 	});

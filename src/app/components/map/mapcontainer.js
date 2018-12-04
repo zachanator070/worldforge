@@ -2,13 +2,15 @@ import React, { Component } from 'react';
 import {withRouter} from "react-router-dom";
 import {connect} from 'react-redux';
 import DefaultViewContainer from "../defaultviewcontainer";
-import {Button, Divider, Drawer, Icon, Row, Upload} from "antd";
+import {Button, Divider, Drawer, Icon, Popover, Row, Upload} from "antd";
 import WikiActionFactory from "../../redux/actions/wikiactionfactory";
 import MapCanvas from "./mapcanvas";
 import MapActionFactory from "../../redux/actions/mapactionfactory";
 import WikiView from "../wiki/wikiview";
 import UIActionFactory from "../../redux/actions/uiactionfactory";
 import DefaultMapView from "./defaultmapview";
+import SlidingDrawer from "../slidingdrawer";
+import MapBreadCrumbs from "./mapbreadcrumbs";
 
 class Map extends Component {
 
@@ -33,12 +35,66 @@ class Map extends Component {
 		this.setState({ width: window.innerWidth, height: window.innerHeight - 42});
 	};
 
+	getPins = () => {
+		let pins =  [];
+		for (let pin of this.props.allPins.filter((pin) => {return pin.map._id === this.props.currentMap.image._id})){
 
+			const editButton = this.props.currentWorld && this.props.currentWorld.canWrite ?
+				<a href='#' className='margin-md-left' onClick={() => {
+					this.props.setPinBeingEdited(pin);
+					this.props.showEditPinModal(true);
+				}}>Edit Pin</a>
+				: null;
+
+			let pinPopupContent = <div>
+				<h2>Empty Pin</h2>
+				{editButton}
+			</div>;
+
+			if(pin.page){
+				pinPopupContent = <div>
+					<h2>{pin.page.name}</h2>
+					<h3>{pin.page.type}</h3>
+					<a href='#' onClick={() => {
+						this.props.findAndSetDisplayWiki(pin.page._id);
+						this.props.showLeftDrawer(true);
+					}}>Details</a>
+					{pin.page.type === 'place' && pin.page.mapImage ? <a className='margin-md-left' href='#' onClick={() => {this.props.gotoPage('/ui/map', {map: pin.page.mapImage._id})}}>Open Map</a> : null }
+					{editButton}
+				</div>;
+			}
+
+			pins.push({
+				x: pin.x,
+				y: pin.y,
+				render: (x, y) => {
+					return (
+						<Popover
+							content={pinPopupContent}
+							trigger="click"
+							key={pin._id}
+							overlayStyle={{zIndex: '3'}}
+						>
+							<Icon
+								type="pushpin"
+								style={{position: 'absolute', left: x, top: y - 50, fontSize: '50px', zIndex: 1, color:'red'}}
+								theme='filled'
+								draggable="false"
+							/>
+						</Popover>
+					);
+				}
+			});
+		}
+
+		return pins;
+	};
 
 	render(){
 		if(!this.props.currentWorld){
 			return (<DefaultViewContainer/>);
 		}
+		const pins = this.getPins();
 
 		let canvas = <MapCanvas
 			height={this.state.height}
@@ -46,12 +102,21 @@ class Map extends Component {
 			setCurrentMapPosition={this.props.setCurrentMapPosition}
 			setCurrentMapZoom={this.props.setCurrentMapZoom}
 			currentMap={this.props.currentMap}
-			createPin={this.props.createPin}
 			currentWorld={this.props.currentWorld}
-			findAndSetDisplayWiki={this.props.findAndSetDisplayWiki}
-			showDrawer={this.props.showDrawer}
-			showEditPinModal={this.props.showEditPinModal}
-			setPinBeingEdited={this.props.setPinBeingEdited}
+			menuItems={[
+				{
+					onClick: (mouseX, mouseY) => {
+						let pin = {
+							x: (mouseX - this.state.width / 2 ) / this.props.currentMap.zoom - this.props.currentMap.x,
+							y: (mouseY - 42 - this.state.height / 2 ) / this.props.currentMap.zoom - this.props.currentMap.y,
+							map: this.props.currentMap.image._id
+						};
+						this.props.createPin(pin);
+					},
+					name: 'New Pin'
+				}
+			]}
+			extras={pins}
 		/>;
 
 		if(!this.props.currentMap.image){
@@ -64,21 +129,27 @@ class Map extends Component {
 
 		return (
 			<div id='mapContainer' style={{position: 'relative'}} className='overflow-hidden'>
+				<MapBreadCrumbs
+					gotoPage={this.props.gotoPage}
+					currentWorld={this.props.currentWorld}
+					currentMap={this.props.currentMap}
+					allWikis={this.props.allWikis}
+					allPins={this.props.allPins}
+				/>
 				{this.props.displayWiki ?
-					<div style={{height: this.state.height}} className='drawer'>
-						<div className={this.props.ui.showDrawer ? 'show-drawer drawer-content' : 'hide-drawer drawer-content'}>
-							<WikiView
-								gotoPage={this.props.gotoPage}
-								currentWiki={this.props.displayWiki}
-								currentWorld={this.props.currentWorld}
-							/>
-						</div>
-						<div className='hide-button'>
-							<a href='#' onClick={() => {this.props.showDrawer(!this.props.ui.showDrawer)}}>
-								{this.props.ui.showDrawer ? <Icon type="double-left" /> : <Icon type="double-right" /> }
-							</a>
-						</div>
-					</div>
+					<SlidingDrawer
+						side='left'
+						show={this.props.ui.showLeftDrawer}
+						setShow={this.props.showLeftDrawer}
+						height={this.state.height}
+						maxWidth={this.state.width}
+					>
+						<WikiView
+							gotoPage={this.props.gotoPage}
+							currentWiki={this.props.displayWiki}
+							currentWorld={this.props.currentWorld}
+						/>
+					</SlidingDrawer>
 					: null}
 				{canvas}
 			</div>
@@ -91,6 +162,8 @@ const mapStateToProps = state => {
 		currentUser: state.currentUser,
 		currentWorld: state.currentWorld,
 		currentMap: state.currentMap,
+		allPins: state.allPins,
+		allWikis: state.allWikis,
 		displayWiki: state.displayWiki,
 		ui: state.ui,
 	}
@@ -104,8 +177,8 @@ const mapDispatchToProps = dispatch => {
 		setCurrentMapPosition: (x, y) => {
 			dispatch(MapActionFactory.setCurrentMapPosition(x, y));
 		},
-		showDrawer: (show) => {
-			dispatch(UIActionFactory.showDrawer(show));
+		showLeftDrawer: (show) => {
+			dispatch(UIActionFactory.showLeftDrawer(show));
 		},
 		gotoPage: (path, params = null, override=false) => {
 			dispatch(UIActionFactory.gotoPage(path, params, override));

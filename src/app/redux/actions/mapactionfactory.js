@@ -9,7 +9,6 @@ class MapActionFactory {
 	static SET_PINS = 'SET_PINS';
 	static SET_PIN_BEING_EDITED = 'SET_PIN_BEING_EDITED';
 
-
 	static getAndSetMap(mapId){
 		return async (dispatch, getState, {apiClient, history}) => {
 			try{
@@ -17,7 +16,6 @@ class MapActionFactory {
 				dispatch(MapActionFactory.setMap(mapImage));
 				const chunks = await apiClient.getChunks(mapImage._id);
 				dispatch(MapActionFactory.setCurrentMapChunks(chunks));
-				dispatch(MapActionFactory.getAndSetPins(getState().currentWorld._id));
 			} catch (e){
 				UIActionFactory.showError(e)
 			}
@@ -103,7 +101,6 @@ class MapActionFactory {
 			} catch(e){
 				UIActionFactory.showError(e);
 			}
-
 		}
 	}
 
@@ -113,6 +110,7 @@ class MapActionFactory {
 			pin: pin
 		}
 	}
+
 }
 
 export default MapActionFactory;

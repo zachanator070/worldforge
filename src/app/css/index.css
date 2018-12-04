@@ -13,6 +13,10 @@ body {
 	display: block;
 }
 
+#editor{
+	border: none;
+}
+
 .width-65{
 	width: 65%
 }
@@ -47,6 +51,14 @@ body {
 
 .padding-md {
 	padding: 15px;
+}
+
+.padding-md-left {
+	padding-left: 15px;
+}
+
+.padding-md-right {
+	padding-right: 15px;
 }
 
 .padding-lg {
@@ -108,6 +120,7 @@ body {
 	position: relative;
 	width: 100%;
 }
+
 .selected{
 	background-color: #1890ff;
 	color: white;
@@ -133,7 +146,6 @@ body {
 }
 
 .upload-list-inline {
-	/*float: left;*/
 	width: 200px;
 	margin-right: 8px;
 }
@@ -142,9 +154,32 @@ div.ant-upload-list-item{
 	width: 200px;
 }
 
-.drawer {
+.absolute{
 	position: absolute;
-	width: 30%;
+}
+
+.absolute-right{
+	position: absolute;
+	right: 0px;
+}
+
+.absolute-left{
+	position: absolute;
+	left: 0px;
+}
+
+.float-left{
+	position: relative;
+	float: left;
+}
+
+.float-right{
+	position: relative;
+	float: right;
+}
+
+.drawer{
+	display: inline;
 	z-index: 2;
 }
 
@@ -154,36 +189,17 @@ div.ant-upload-list-item{
 	width: 100%;
 	height: 100%;
 	border-right: thin lightgrey solid;
+	border-left: thin lightgrey solid;
+	border-top: thin lightgrey solid;
 	background-color: white;
 }
 
-.show-drawer{
-	animation: show-drawer;
-	animation-duration: .5s;
-	position: relative;
-}
-@keyframes show-drawer {
-	0%   {left:-100%; top:0px; width: 0%}
-	100%   {left:0px; top:0px; width: 100%}
-}
-
-.hide-drawer{
-	animation: hide-drawer;
-	animation-duration: .5s;
-	position: relative;
-	left: -100%;
-	width: 0%;
-}
-@keyframes hide-drawer {
-	0%   {left:0px; top:0px; width: 100%}
-	100%   {left:-100%; top:0px; width: 0px}
-}
-
-.hide-button {
+.drawer-button {
 	display: inline-block;
 	position: absolute;
 	margin-left: 15px;
 	margin-top: 15px;
+	margin-right: 15px;
 }
 
 .search-results{
@@ -196,4 +212,19 @@ div.ant-upload-list-item{
 	width: 260px;
 	padding: 30px;
 	margin: auto;
+}
+
+.message-box{
+	border: thin solid lightgrey;
+	border-radius: 5px;
+	padding: 15px;
+	height: 300px;
+	overflow: auto;
+}
+
+.breadcrumbs{
+	background-color: white;
+	z-index: 2;
+	padding: 5px;
+	position: relative;
 }

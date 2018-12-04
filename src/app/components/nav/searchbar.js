@@ -61,13 +61,13 @@ class SearchBar extends Component{
 										<List.Item
 											className='searchResult'
 											onClick={() => {
-												if(this.props.history.location.pathname === '/ui/map'){
+												if(!this.props.history.location.pathname.includes('/ui/wiki')){
 													this.props.findAndSetDisplayWiki(item._id);
 												}
 												else {
 													this.props.gotoPage('/ui/wiki/view', {wiki: item._id});
 												}
-												this.props.showDrawer(true);
+												this.props.showLeftDrawer(true);
 												this.setState({showResults: false});
 											}}
 										>

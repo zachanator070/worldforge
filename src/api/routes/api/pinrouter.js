@@ -4,14 +4,26 @@ let PinRouter = express.Router();
 const Pin = require('../../models/pin');
 const passportConfig = require('../../passport');
 const World = require('../../models/world');
+const Image = require('../../models/image');
 
 PinRouter.get('/:id', (req, res, next) => {
 
-	Pin.findOne({_id: req.params.id})
+	let params = {};
+
+	if(req.params.id){
+		params._id = req.params.id;
+	}
+
+	params = Object.assign(params, req.query);
+
+	Pin.findOne(params)
 		.populate({
-			path: 'world page',
+			path: 'map page',
 			populate: {
-				path: 'owner',
+				path: 'world',
+				populate: {
+					path: 'owner'
+				}
 			}
 		}).exec((err, pin) => {
 		if(err){
@@ -20,7 +32,7 @@ PinRouter.get('/:id', (req, res, next) => {
 		if(!pin){
 			return res.status(404).send();
 		}
-		if(!pin.world.userCanRead(req.user)){
+		if(!pin.map.world.userCanRead(req.user)){
 			return res.status(403).json({error: 'Unauthorized'});
 		}
 		return res.json(pin);
@@ -30,35 +42,45 @@ PinRouter.get('/:id', (req, res, next) => {
 
 PinRouter.get('/', (req, res, next) => {
 
-	if(!req.query.world){
-		return res.status(400).json({error: 'Need world id parameter'});
-	}
-
-	World.findOne({_id: req.query.world}).populate('owner').exec((err, world) => {
-		if(err){
-			return res.status(500).json({error: err})
-		}
-
-		if(!world.userCanRead(req.user)){
-			return res.status(403).json({error: 'Unauthorized'});
-		}
-
-		const params = {
-			world: req.query.world
-		};
-
-		if(req.query.map){
-			params.map = req.query.map;
-		}
-
-		Pin.find(params).populate('world page').exec((err, pins) => {
+	const params = Object.assign({}, req.query);
+	if(params.world){
+		Image.find({world: params.world}, (err, images) => {
 			if(err){
 				return res.status(500).json({error: err})
 			}
-			return res.json(pins);
-		});
-	});
 
+			if(images.length > 0){
+				delete params.world;
+				params.map = {$in: images.map((image) => {return image._id})};
+			}
+
+			Pin.find(params)
+				.populate({
+					path: 'map',
+					populate: {
+						path: 'world'
+					}
+				})
+				.populate({
+					path: 'page',
+					populate: {
+						path: 'mapImage world coverImage'
+					}
+				})
+				.exec((err, pins) => {
+					if(err){
+						return res.status(500).json({error: err})
+					}
+					for(let pin of pins){
+						if(!pin.map.world.userCanRead(req.user)){
+							return res.status(401).json({error: 'You do not have permission to view this pin'});
+						}
+					}
+					return res.json(pins);
+				});
+
+		})
+	}
 
 
 });
@@ -66,15 +88,23 @@ PinRouter.get('/', (req, res, next) => {
 PinRouter.put('/:id', passportConfig.loggedInMiddleware, (req, res, next) => {
 
 	Pin.findOne({_id: req.params.id})
-		.populate('world').exec((err, pin) => {
+		.populate({
+			path: 'map page',
+			populate: {
+				path: 'world',
+				populate: {
+					path: 'owner'
+				}
+			}
+		}).exec((err, pin) => {
 		if(err){
 			return res.status(500).json({error: err})
 		}
-		if(!pin.world.userCanWrite(req.user)){
+		if(!pin.map.world.userCanWrite(req.user)){
 			return res.status(403).json({error: 'Unauthorized'});
 		}
 
-		Pin.findOneAndUpdate({_id: req.params.id}, { $set: req.body}).exec((err, pin) => {
+		Pin.findOneAndUpdate({_id: req.params.id}, { $set: req.body}, {new: true}).exec((err, pin) => {
 			if(err){
 				return res.status(500).json({error: err})
 			}
@@ -87,11 +117,19 @@ PinRouter.put('/:id', passportConfig.loggedInMiddleware, (req, res, next) => {
 PinRouter.delete('/:id', passportConfig.loggedInMiddleware, (req, res, next) => {
 
 	Pin.findOne({_id: req.params.id})
-		.populate('world').exec((err, pin) => {
+		.populate({
+			path: 'map page',
+			populate: {
+				path: 'world',
+				populate: {
+					path: 'owner'
+				}
+			}
+		}).exec((err, pin) => {
 		if(err){
 			return res.status(500).json({error: err})
 		}
-		if(!pin.world.userCanWrite(req.user)){
+		if(!pin.map.world.userCanWrite(req.user)){
 			return res.status(403).json({error: 'Unauthorized'});
 		}
 

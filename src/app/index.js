@@ -11,7 +11,7 @@ import ApiClient from "./apiclient";
 import { createBrowserHistory } from 'history';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import io from 'socket.io-client';
-import GameSocket from "./gamesocket";
+import GameClientSocket from "./gameclientsocket";
 
 const apiClient = new ApiClient();
 const rootReducer = new RootReducer(combineReducers);
@@ -24,7 +24,7 @@ const store = createStore(
 	)
 );
 
-const gameSocket = new GameSocket(socket, store);
+const gameSocket = new GameClientSocket(socket, store);
 gameSocket.initialize();
 
 const app = (

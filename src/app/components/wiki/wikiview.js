@@ -62,7 +62,14 @@ class WikiView extends Component{
 		}
 		let mapIcon = null;
 		if (this.props.currentWiki.type === 'place' && this.props.currentWiki.mapImage){
-			mapIcon = <ScaledImage width={this.state.width} height={this.state.height} src={`/api/chunks/data/${this.props.currentWiki.mapImage.icon.chunks[0]._id}`}/>
+			mapIcon = <div>
+				<ScaledImage width={this.state.width} height={this.state.height} src={`/api/chunks/data/${this.props.currentWiki.mapImage.icon.chunks[0]._id}`}/>
+				<span className='margin-md-left'>
+					<a href='#' onClick={() => {this.props.gotoPage('/ui/map', {map: this.props.currentWiki.mapImage._id});}}>
+						<Icon type="export" />
+					</a>
+				</span>
+			</div>;
 		}
 		return (
 			<div ref='wikiView' className='margin-md-top'>

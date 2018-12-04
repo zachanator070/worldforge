@@ -265,16 +265,6 @@ class ApiClient {
 		return await this.jsonOrError(response);
 	}
 
-	async getChunk(chunkId){
-		let response = await fetch(
-			`/api/chunks/data/${chunkId}`,
-			{
-				method: 'GET',
-			}
-		);
-		return await response.arrayBuffer();
-	}
-
 	async searchWikis(params){
 		const url = '/api/wikiPages?' + Object.entries(params).map(pair => pair[0] + '=' + pair[1]).join('&');
 		let response = await fetch(

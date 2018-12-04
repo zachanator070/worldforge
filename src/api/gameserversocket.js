@@ -1,5 +1,6 @@
 
 const Game = require('./models/game');
+const User = require('./models/user');
 
 class GameServerSocket {
 	constructor(io){
@@ -7,12 +8,27 @@ class GameServerSocket {
 	}
 
 	populateGame(game, callback){
-		Game.findOne({_id: game._id}).populate({
-			path: 'mapImage world players icons paths messages',
-			populate: {
-				path: 'image sender'
+		game.populate({
+			path: 'mapImage',
+			populate:{
+				path: 'chunks'
 			}
-		}).exec((err, game) => {
+		}).populate({
+			path: 'world',
+			populate: {
+				path: 'owner',
+				select: 'displayName'
+			}
+		}).populate({
+			path: 'players.player',
+		}).populate({
+			path: 'icons',
+			populate:{
+				path: 'image'
+			}
+		}).populate({
+			path: 'paths',
+		}, (err, game) => {
 			callback(err, game);
 		});
 	}
@@ -47,63 +63,87 @@ class GameServerSocket {
 						return;
 					}
 
-					if(!game.passwordHash && game.validPassword(password)){
+					if(game.passwordHash && !game.validPassword(password)){
 						callback(new Error('Wrong password'));
 						return;
 					}
 
-					else {
-						game.players.push({player: userId, socketId: socket.id});
-						game.save((err) => {
-							if(err){
-								callback(err);
+					this.populateGame(game, (error, game) => {
+						User.findOne({_id: userId}, (error, user) => {
+							if(!game.world.userCanRead(user)){
+								callback(new Error('You do not gave permission to this game world'));
+								return;
 							}
-							else{
-								socket.join(gameId, (error) => {
-									if(error){
-										callback(error);
-									}
-									else{
-										this.populateGame(game, (err, newGame) => {
-											if(!err){
-												socket.broadcast.emit('SET_GAME', newGame);
-											}
-											callback(err, newGame);
-										});
-									}
-								});
-							}
+							game.players.push({player: userId, socketId: socket.id});
+							game.messages.push({
+								sender: user.displayName,
+								message: `${user.displayName} has joined`,
+								timeStamp: (new Date()).toUTCString()
+							});
+							game.save((err) => {
+								if(err){
+									callback(err);
+								}
+								else{
+									socket.join(gameId, (error) => {
+										if(error){
+											callback(error);
+										}
+										else{
+											this.populateGame(game, (err, newGame) => {
+												if(!err){
+													socket.broadcast.emit('SET_GAME', newGame);
+												}
+												callback(err, newGame);
+											});
+										}
+									});
+								}
+							});
 						});
-					}
+					});
 				});
 			});
 
-			socket.on('LEAVE_GAME', (userId, gameId, callback) => {
-				Game.findOneAndUpdate({_id: gameId}, {$pull: {players: userId}}, (error, game) => {
-
+			socket.on('LEAVE_GAME', (callback) => {
+				Game.findOne({'players.socketId': socket.id}, (error, game) => {
 					if(error){
 						callback(error);
+						return;
 					}
-					else {
-						socket.leave(gameId, (error) => {
-							if(error){
-								callback(error);
-							}
-							else{
-								this.populateGame(game, (err, newGame) => {
-									if(!err){
-										socket.broadcast.emit('SET_GAME', newGame);
-									}
-									callback(err, newGame);
+					this.populateGame(game, (error, newGame) => {
+						if(error){
+							callback(error);
+							return;
+						}
+						const player = newGame.players.filter((player) => {return player.socketId === socket.id})[0].player;
+						Game.findOneAndUpdate({'players.socketId': socket.id},
+							{
+								$pull: {players: {socketId: socket.id}},
+								$push: {messages:{
+										sender: player.displayName,
+										message: `${player.displayName} has left`,
+										timeStamp: (new Date()).toUTCString()
+									}}
+							},
+							{new: true},
+							(error, game) => {
+								if(error){
+									callback(error);
+									return;
+								}
+								this.populateGame(game, (error, newGame) => {
+									socket.broadcast.emit('SET_GAME', newGame);
+									callback(error);
 								});
 							}
-						});
-					}
+						);
+					});
 				});
 			});
 
 			socket.on('SET_GAME_MAP', (imageId, callback) => {
-				Game.findOneAndUpdate({players: {socketId: socket.id}}, {mapImage: imageId}, (error, game) => {
+				Game.findOneAndUpdate({'players.socketId': socket.id}, {$set: {mapImage: imageId}}, {new: true},(error, game) => {
 
 					if(error){
 						callback(error);
@@ -119,8 +159,8 @@ class GameServerSocket {
 				});
 			});
 
-			socket.on('MESSAGE', (message, callback) => {
-				Game.findOne({players: {socketId: socket.id}}, (error, game) => {
+			socket.on('GAME_MESSAGE', (message, callback) => {
+				Game.findOne({'players.socketId': socket.id}, (error, game) => {
 
 					if(error){
 						callback(error);
@@ -131,19 +171,45 @@ class GameServerSocket {
 								callback(err, newGame);
 								return;
 							}
-							const player = newGame.players.filter((player) => {return player.socketId === socket.id})[0];
-							newGame.message.push({
-								sender: player._id,
+							const player = newGame.players.filter((player) => {return player.socketId === socket.id})[0].player;
+							newGame.messages.push({
+								sender: player.displayName,
 								message: message,
-								timestamp: (new Date()).toUTCString()
+								timeStamp: (new Date()).toUTCString()
 							});
 							newGame.save((error) => {
 								if(!error){
 									socket.broadcast.emit('SET_GAME', newGame);
 								}
-								callback(error, newGame);
+								this.populateGame(newGame, callback);
 							});
 
+						});
+					}
+				});
+			});
+
+			socket.on('disconnect', () => {
+				Game.findOne({'players.socketId': socket.id}, (error, game) => {
+					if(game){
+						this.populateGame(game, (error, newGame) => {
+							const player = newGame.players.filter((player) => {return player.socketId === socket.id})[0].player;
+							Game.findOneAndUpdate({'players.socketId': socket.id},
+								{
+									$pull: {players: {socketId: socket.id}},
+									$push: {messages:{
+											sender: player.displayName,
+											message: `${player.displayName} has left`,
+											timeStamp: (new Date()).toUTCString()
+										}}
+								},
+								{new: true},
+								(error, game) => {
+									this.populateGame(game, (error, newGame) => {
+										socket.broadcast.emit('SET_GAME', newGame);
+									});
+								}
+							);
 						});
 					}
 				});

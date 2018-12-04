@@ -136,7 +136,7 @@ class WikiEdit extends Component{
 
 		let mapRevert = null;
 		if(this.state.mapToUpload !== false){
-			mapRevert = <Button onClick={() => {this.setMapToUpload(false); this.loadMapImageList();}}>Revert</Button>;
+			mapRevert = <Button type='danger' onClick={() => {this.setMapToUpload(false); this.loadMapImageList();}}>Revert</Button>;
 		}
 
 		return (
@@ -166,29 +166,33 @@ class WikiEdit extends Component{
 					</Upload>
 					{coverRevert}
 				</div>
-				<div className='margin-lg'>
-					<Upload
-						action="/api/images"
-						beforeUpload={this.setMapToUpload}
-						multiple={false}
-						listType={'picture'}
-						coverImage={this.state.mapToUpload}
-						fileList={this.state.mapImageList}
-						className='upload-list-inline'
-						onChange={this.setMapImageList}
-					>
-						<Button>
-							<Icon type="upload" /> Select Map Image
-						</Button>
-					</Upload>
-					{mapRevert}
-				</div>
+				{this.state.type === 'place' ?
+					<div className='margin-lg'>
+						<Upload
+							action="/api/images"
+							beforeUpload={this.setMapToUpload}
+							multiple={false}
+							listType={'picture'}
+							coverImage={this.state.mapToUpload}
+							fileList={this.state.mapImageList}
+							className='upload-list-inline'
+							onChange={this.setMapImageList}
+						>
+							<Button>
+								<Icon type="upload" /> Select Map Image
+							</Button>
+						</Upload>
+						{mapRevert}
+					</div>
+					: null
+				}
+
 				<div className='margin-lg'>
 					<div id="editor"></div>
 				</div>
 
 				<Button type='primary' disabled={this.state.saving} onClick={this.save}>Save</Button>
-				<Button type='danger' onClick={() => {this.props.gotoPage('/ui/wiki/view')}}>Discard</Button>
+				<Button type='danger' className='margin-md-left' onClick={() => {this.props.gotoPage('/ui/wiki/view')}}>Discard</Button>
 			</div>
 		);
 	}

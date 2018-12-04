@@ -10,15 +10,11 @@ const pinSchema = Schema({
 		type: Number,
 		required: [true, 'y position required']
 	},
-	world: {
+	map: {
 		type: mongoose.Schema.ObjectId,
-		required: [true, 'world field required'],
-		ref: 'World'
+		ref: 'Image',
+		required: [true, 'map required']
 	},
-	map: [{
-		type: mongoose.Schema.ObjectId,
-		ref: 'Image'
-	}],
 	page: {
 		type: mongoose.Schema.ObjectId,
 		ref: 'WikiPage'

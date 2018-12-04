@@ -12,7 +12,8 @@ class UIActionFactory {
 	static SHOW_WORLD_SELECT_MODAL = 'SHOW_WORLD_SELECT_MODAL';
 	static SHOW_WORLD_PERMISSION_MODAL = 'SHOW_WORLD_PERMISSION_MODAL';
 	static SHOW_CREATE_WORLD_MODAL = 'SHOW_CREATE_WORLD_MODAL';
-	static SHOW_DRAWER = 'SHOW_DRAWER';
+	static SHOW_LEFT_DRAWER = 'SHOW_LEFT_DRAWER';
+	static SHOW_RIGHT_DRAWER = 'SHOW_RIGHT_DRAWER';
 	static SHOW_EDIT_PIN_MODAL = 'SHOW_EDIT_PIN_MODAL';
 	static SET_MAP_UPLOAD_STATUS = 'SET_MAP_UPLOAD_STATUS';
 	static SHOW_SESSION_TIMEOUT_MODAL = 'SHOW_SESSION_TIMEOUT_MODAL';
@@ -39,9 +40,6 @@ class UIActionFactory {
 				type: UIActionFactory.SHOW_WORLD_SELECT_MODAL,
 				show: show,
 			});
-			if(!show){
-				dispatch(WorldActionFactory.displayWorld(null))
-			}
 		}
 	}
 
@@ -123,9 +121,16 @@ class UIActionFactory {
 		}
 	}
 
-	static showDrawer(show){
+	static showLeftDrawer(show){
 		return {
-			type: UIActionFactory.SHOW_DRAWER,
+			type: UIActionFactory.SHOW_LEFT_DRAWER,
+			show: show
+		};
+	}
+
+	static showRightDrawer(show){
+		return {
+			type: UIActionFactory.SHOW_RIGHT_DRAWER,
 			show: show
 		};
 	}

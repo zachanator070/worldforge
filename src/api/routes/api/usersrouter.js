@@ -9,7 +9,7 @@ UsersRouter.get('/current', passportConfig.loggedInMiddleware, (req, res, next) 
 });
 
 UsersRouter.put('/current', passportConfig.loggedInMiddleware, (req, res, next) => {
-	User.findOneAndUpdate({_id: req.user._id}, { $set: req.body}, function (err, user){
+	User.findOneAndUpdate({_id: req.user._id}, { $set: req.body}, {new: true}, function (err, user){
 		res.redirect(307, `/api/users/${req.user._id}`);
 	});
 });
@@ -31,7 +31,7 @@ UsersRouter.put('/:id', passportConfig.loggedInMiddleware, (req, res, next) => {
 		return res.status(403).json({error: 'Can only change your user'});
 	}
 	console.log(JSON.stringify(req.body));
-	User.findOneAndUpdate({_id: req.params.id}, { $set: req.body}).exec(function (err, user){
+	User.findOneAndUpdate({_id: req.params.id}, { $set: req.body}, {new: true}).exec(function (err, user){
 			if(err){
 				return res.status(500).send(err)
 			}

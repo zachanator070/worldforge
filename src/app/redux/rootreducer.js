@@ -58,7 +58,8 @@ class RootReducer {
 		showSelectWorldModal: false,
 		showCreateWorldModal: false,
 		showWorldPermissionModal: false,
-		showDrawer: false,
+		showLeftDrawer: false,
+		showRightDrawer: false,
 		showEditPinModal: false,
 		mapUploadStatus: null,
 	}, action){
@@ -83,9 +84,13 @@ class RootReducer {
 				return Object.assign({}, state, {
 					showCreateWorldModal: action.show
 				});
-			case UIActionFactory.SHOW_DRAWER:
+			case UIActionFactory.SHOW_LEFT_DRAWER:
 				return Object.assign({}, state, {
-					showDrawer: action.show
+					showLeftDrawer: action.show
+				});
+			case UIActionFactory.SHOW_RIGHT_DRAWER:
+				return Object.assign({}, state, {
+					showRightDrawer: action.show
 				});
 			case UIActionFactory.SHOW_EDIT_PIN_MODAL:
 				return Object.assign({}, state, {
@@ -99,15 +104,6 @@ class RootReducer {
 				return Object.assign({}, state, {
 					mapUploadStatus: action.status
 				});
-			default:
-				return state;
-		}
-	}
-
-	displayWorldReducer(state = null, action){
-		switch(action.type){
-			case WorldActionFactory.SET_DISPLAY_WORLD:
-				return action.displayWorld;
 			default:
 				return state;
 		}
@@ -143,6 +139,15 @@ class RootReducer {
 				return Object.assign({}, state, {
 					pins: action.pins
 				});
+			default:
+				return state;
+		}
+	}
+
+	allPinsReducer(state = [], action){
+		switch (action.type) {
+			case MapActionFactory.SET_PINS:
+					return action.pins;
 			default:
 				return state;
 		}
@@ -223,11 +228,11 @@ class RootReducer {
 			currentUser: this.currentUserReducer,
 			currentWorld: this.currentWorldReducer,
 			currentMap: this.currentMapReducer,
+			allPins: this.allPinsReducer,
 			currentWiki: this.currentWikiReducer,
 			wikiSearchResults: this.wikiSearchResultsReducer,
 			ui: this.uiReducer,
 			displayWiki: this.displayWikiReducer,
-			displayWorld: this.displayWorldReducer,
 			availableWorlds: this.availableWorldsReducer,
 			allWikis: this.allWikisReducer,
 			pinBeingEdited: this.pinBeingEditedReducer,

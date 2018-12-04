@@ -7,7 +7,15 @@ const World = require('../../models/world');
 
 WikiPageRouter.get('/:id', (req, res, next) => {
 
-	WikiPage.findOne({_id: req.params.id})
+	let params = {};
+
+	if(req.params.id){
+		params._id = req.params.id;
+	}
+
+	params = Object.assign(params, req.query);
+
+	WikiPage.findOne(params)
 		.populate({
 			path: 'world coverImage mapImage',
 			populate: {
@@ -51,15 +59,19 @@ WikiPageRouter.get('/', (req, res, next) => {
 			params.name = { $regex: '^' + req.query.name + '.*' , $options: 'i'}
 		}
 
-		WikiPage.find(params, (err, pages) => {
+		WikiPage.find(params).populate({
+			path: 'coverImage mapImage',
+			populate:{
+				path: 'chunks icon',
+				populate: {path: 'chunks'}
+			}
+		}).exec((err, pages) => {
 			if(err){
 				return res.status(500).json({error: err})
 			}
 			return res.json(pages);
 		});
 	});
-
-
 
 });
 
@@ -79,7 +91,7 @@ WikiPageRouter.put('/:id', passportConfig.loggedInMiddleware, (req, res, next) =
 
 			// TODO: need to figure out what to do when a new image is set on the page, need image cleanup logic
 
-			WikiPage.findOneAndUpdate({_id: req.params.id}, { $set: req.body}).exec((err, page) => {
+			WikiPage.findOneAndUpdate({_id: req.params.id}, { $set: req.body}, {new: true}).exec((err, page) => {
 				if(err){
 					return res.status(500).json({error: err})
 				}

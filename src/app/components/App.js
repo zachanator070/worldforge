@@ -8,7 +8,6 @@ import NavbarContainer from "./nav/navbarcontainer";
 import {Router, Route, Switch, withRouter} from "react-router-dom";
 import LoginActionFactory from "../redux/actions/loginactionfactory";
 import ModalsContainer from "./modals/modalscontainer";
-import WorldActionFactory from "../redux/actions/worldactionfactory";
 import DefaultViewContainer from './defaultviewcontainer';
 import WikiContainer from "./wiki/wikicontainer";
 import MapContainer from "./map/mapcontainer";

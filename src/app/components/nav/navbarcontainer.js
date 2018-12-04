@@ -46,7 +46,7 @@ class NavBar extends Component {
 			<div className='shadow-sm padding-sm nav-bar'>
 				<Row>
 					<Col span={4}>
-						<div className='margin-md-left margin-sm-top'>
+						<div className='margin-md-left'>
 							<WorldMenu
 								currentUser={this.props.currentUser}
 								currentWorld={this.props.currentWorld}
@@ -73,7 +73,7 @@ class NavBar extends Component {
 								wikiSearchResults={this.props.wikiSearchResults}
 								findAndSetDisplayWiki={this.props.findAndSetDisplayWiki}
 								currentWorld={this.props.currentWorld}
-								showDrawer={this.props.showDrawer}
+								showLeftDrawer={this.props.showLeftDrawer}
 								gotoPage={this.props.gotoPage}
 							/>
 							: null
@@ -124,8 +124,8 @@ const mapDispatchToProps = dispatch => {
 		findAndSetDisplayWiki: (wikiId) => {
 			dispatch(WikiActionFactory.findAndSetDisplayWiki(wikiId));
 		},
-		showDrawer: (show) => {
-			dispatch(UIActionFactory.showDrawer(show));
+		showLeftDrawer: (show) => {
+			dispatch(UIActionFactory.showLeftDrawer(show));
 		}
 	}
 };

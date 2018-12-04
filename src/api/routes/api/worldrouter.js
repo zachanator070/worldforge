@@ -154,7 +154,7 @@ WorldRouter.put('/:id', passportConfig.loggedInMiddleware, (req, res, next) => {
 			return res.status(403).json({error: 'You do not have permission to edit'})
 		}
 
-		World.findOneAndUpdate({_id: req.params.id}, { $set: req.body}, function (err, world){
+		World.findOneAndUpdate({_id: req.params.id}, { $set: req.body}, {new: true}, function (err, world){
 			if(err){
 				return res.status(500).json({error: err.message})
 			}

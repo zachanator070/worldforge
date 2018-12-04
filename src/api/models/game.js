@@ -12,6 +12,11 @@ const gameSchema = Schema({
 		type: String,
 		set: setPassword
 	},
+	world: {
+		type: mongoose.Schema.ObjectId,
+		ref: 'World',
+		required: [true, 'worldId required']
+	},
 	mapImage: {
 		type: mongoose.Schema.ObjectId,
 		ref: 'Image',
@@ -50,9 +55,8 @@ const gameSchema = Schema({
 	})],
 	messages:[Schema({
 		sender:{
-			type: mongoose.Schema.ObjectId,
-			ref: 'User',
-			required: [true, 'icon image id required']
+			type: String,
+			required: [true, 'sender required']
 		},
 		message: {
 			type: String,

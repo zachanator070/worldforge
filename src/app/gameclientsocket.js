@@ -1,6 +1,6 @@
 import GameActionFactory from "./redux/actions/gameactionfactory";
 
-class GameSocket {
+class GameClientSocket {
 
 	constructor(socket, store){
 		this.socket = socket;
@@ -11,7 +11,8 @@ class GameSocket {
 		this.socket.on(GameActionFactory.SET_GAME, (game) => {
 			this.store.dispatch(GameActionFactory.setGame(game));
 		});
+
 	}
 }
 
-export default GameSocket;
+export default GameClientSocket;

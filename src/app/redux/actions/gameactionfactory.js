@@ -1,3 +1,4 @@
+import UIActionFactory from "./uiactionfactory";
 
 class GameActionFactory {
 
@@ -8,21 +9,41 @@ class GameActionFactory {
 	static joinGame(gameId, password){
 		return async (dispatch, getState, { apiClient, history, socket}) => {
 			socket.emit('JOIN_GAME', getState().currentUser._id, gameId, password, (error, game) => {
-				dispatch(GameActionFactory.setGame(game));
+				if(error){
+					UIActionFactory.showError(error);
+				}
+				else{
+					dispatch(UIActionFactory.showLeftDrawer(false));
+					dispatch(UIActionFactory.showRightDrawer(false));
+					dispatch(GameActionFactory.setGame(game));
+				}
 			});
 		}
 	}
 
-	static createGame(password){
+	static leaveGame(){
+		return async (dispatch, getState, { apiClient, history, socket}) => {
+			socket.emit('LEAVE_GAME', (error) => {
+				if(error){
+					UIActionFactory.showError(error);
+				}
+				else{
+					dispatch(UIActionFactory.showLeftDrawer(false));
+					dispatch(UIActionFactory.showRightDrawer(false));
+					dispatch(GameActionFactory.setGame(null));
+				}
+			});
+		}
+	}
+
+	static createGame(worldId, password){
 		return async (dispatch, getState, { apiClient, history, socket}) => {
 			if(password === ''){
 				password = null;
 			}
-			socket.emit('CREATE_GAME', {passwordHash: password}, (error, game) => {
+			socket.emit('CREATE_GAME', {world: worldId, passwordHash: password}, (error, game) => {
 				if(!error){
-					socket.emit('JOIN_GAME', getState().currentUser._id, game._id, (error, game) => {
-						dispatch(GameActionFactory.setGame(game));
-					});
+					dispatch(GameActionFactory.joinGame(game._id, password));
 				}
 			});
 		}
@@ -47,6 +68,32 @@ class GameActionFactory {
 		return {
 			type: GameActionFactory.SET_GAME_MAP_ZOOM,
 			zoom: zoom
+		}
+	}
+
+	static setMap(imageId){
+		return async (dispatch, getState, { apiClient, history, socket}) => {
+			socket.emit('SET_GAME_MAP', imageId, (error, game) => {
+				if(error){
+					UIActionFactory.showError(error);
+				}
+				else{
+					dispatch(GameActionFactory.setGame(game));
+				}
+			});
+		}
+	}
+
+	static sendMessage(message){
+		return async (dispatch, getState, { apiClient, history, socket}) => {
+			socket.emit('GAME_MESSAGE', message, (error, game) => {
+				if(error){
+					UIActionFactory.showError(error);
+				}
+				else{
+					dispatch(GameActionFactory.setGame(game));
+				}
+			});
 		}
 	}
 }

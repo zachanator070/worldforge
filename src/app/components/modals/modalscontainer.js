@@ -18,7 +18,6 @@ class Modals extends Component {
 			<div>
 				<LoginModal
 					show={this.props.ui.showLoginModal}
-					error={this.props.loginRequest.error}
 					cancel={() => {this.props.showLogin(false);}}
 					login={(username, password) => {
 						this.props.dispatchTryLogin(username, password);
@@ -26,7 +25,6 @@ class Modals extends Component {
 				/>
 				<RegisterModal
 					show={this.props.ui.showRegisterModal}
-					error={this.props.registerRequest.error}
 					cancel={() => {this.props.showRegister(false);}}
 					register={this.props.tryRegister}
 				/>
@@ -35,12 +33,10 @@ class Modals extends Component {
 					showSelectWorldModal={this.props.showSelectWorldModal}
 					submitSelectWorldModal={this.props.submitSelectWorldModal}
 					availableWorlds={this.props.availableWorlds}
-					displayWorld={this.props.displayWorld}
-					setDisplayWorld={this.props.setDisplayWorld}
+					currentWorld={this.props.currentWorld}
 				/>
 				<CreateWorldModal
 					show={this.props.ui.showCreateWorldModal}
-					error={this.props.createWorldRequest.error}
 					createWorld={this.props.createWorld}
 					showCreateWorldModal={this.props.showCreateWorldModal}
 				/>
@@ -59,15 +55,11 @@ class Modals extends Component {
 
 const mapStateToProps = state => {
 	return {
-		loginRequest: state.loginRequest,
-		registerRequest: state.registerRequest,
 		getAvailableWorldsRequest: state.getAvailableWorldsRequest,
-		createWorldRequest: state.createWorldRequest,
 		currentUser: state.currentUser,
 		ui: state.ui,
 		currentWorld: state.currentWorld,
 		availableWorlds: state.availableWorlds,
-		displayWorld: state.displayWorld,
 		allWikis: state.allWikis,
 		pinBeingEdited: state.pinBeingEdited
 	}
@@ -98,9 +90,6 @@ const mapDispatchToProps = dispatch => {
 		},
 		tryRegister: (email, password, displayName) => {
 			dispatch(RegisterActionFactory.tryRegister(email, password, displayName));
-		},
-		setDisplayWorld: (world) => {
-			dispatch(WorldActionFactory.displayWorld(world));
 		},
 		showEditPinModal: (show) => {
 			dispatch(UIActionFactory.showEditPinModal(show));

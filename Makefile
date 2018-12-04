@@ -12,3 +12,7 @@ logs:
 
 restart:
 	docker-compose restart
+	docker-compose logs -f
+
+stop:
+	docker-compose stop

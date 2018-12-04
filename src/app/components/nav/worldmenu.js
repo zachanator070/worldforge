@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Dropdown, Icon, Menu} from "antd";
+import {Button, Dropdown, Icon, Menu} from "antd";
 import CreateWorldForm from "../modals/createworldmodal";
 import Selectworldmodal from "../modals/selectworldmodal";
 
@@ -27,9 +27,9 @@ class WorldMenu extends Component{
 		return(
 			<div>
 				<Dropdown overlay={menu} trigger={['click']}>
-					<a className="ant-dropdown-link" href="#">
+					<Button>
 						{this.props.currentWorld ? this.props.currentWorld.name : 'No World Selected' } <Icon type="down" />
-					</a>
+					</Button>
 				</Dropdown>
 			</div>
 		);

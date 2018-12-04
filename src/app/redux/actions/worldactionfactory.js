@@ -9,7 +9,6 @@ class WorldActionFactory {
 
 	static SET_CURRENT_WORLD = 'SET_CURRENT_WORLD';
 	static SET_AVAILABLE_WORLDS = 'SET_AVAILABLE_WORLDS';
-	static SET_DISPLAY_WORLD = 'SET_DISPLAY_WORLD';
 
 	static getAndSetCurrentWorld(worldId) {
 		return async (dispatch, getState, {apiClient, history}) => {
@@ -36,6 +35,7 @@ class WorldActionFactory {
 				dispatch(MapActionFactory.getAndSetMap(world.wikiPage.mapImage._id));
 			}
 			dispatch(WikiActionFactory.getAllWikis());
+			dispatch(MapActionFactory.getAndSetPins());
 		};
 	}
 
@@ -83,14 +83,6 @@ class WorldActionFactory {
 		};
 	}
 
-	static displayWorld(world){
-		return async (dispatch, getState, { apiClient, history}) => {
-			dispatch({
-				type: WorldActionFactory.SET_DISPLAY_WORLD,
-				displayWorld: world
-			});
-		};
-	}
 }
 
 export default WorldActionFactory;

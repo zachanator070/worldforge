@@ -159,7 +159,7 @@ ImageRouter.get('/:id', (req, res, next) => {
 		}
 
 		if((req.user && !image.world.userCanRead(req.user)) && !image.world.public){
-			return res.status(403).json({error: 'You do not have permission to read'})
+			return res.status(403).json({error: 'You do not have permission to read'});
 		}
 
 		res.json(image);
