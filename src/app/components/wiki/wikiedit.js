@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Button, Icon, Input, Select, Upload} from "antd";
+import {Button, Icon, Input, Select, Upload, Modal} from "antd";
 
 class WikiEdit extends Component{
 
@@ -191,8 +191,21 @@ class WikiEdit extends Component{
 					<div id="editor"></div>
 				</div>
 
-				<Button type='primary' disabled={this.state.saving} onClick={this.save}>Save</Button>
-				<Button type='danger' className='margin-md-left' onClick={() => {this.props.gotoPage('/ui/wiki/view')}}>Discard</Button>
+				<div>
+					<Button type='primary' disabled={this.state.saving} onClick={this.save}>Save</Button>
+					<Button type='danger' disabled={this.state.saving} className='margin-md-left' onClick={() => {this.props.gotoPage('/ui/wiki/view')}}>Discard</Button>
+					<span className='absolute-right' >
+						<Button type='danger' disabled={this.state.saving} onClick={() => {
+							Modal.confirm({
+								title: "Confirm Delete",
+								content: `Are you sure you want to delete the wiki page ${this.props.currentWiki.name}?`,
+								onOk: () => {
+									this.props.deleteWikiPage(this.props.currentWiki);
+								}
+							});
+						}}>Delete Page</Button>
+					</span>
+				</div>
 			</div>
 		);
 	}

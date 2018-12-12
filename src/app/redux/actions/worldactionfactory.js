@@ -9,6 +9,7 @@ class WorldActionFactory {
 
 	static SET_CURRENT_WORLD = 'SET_CURRENT_WORLD';
 	static SET_AVAILABLE_WORLDS = 'SET_AVAILABLE_WORLDS';
+	static SET_FOUND_USERS = 'SET_FOUND_USERS';
 
 	static getAndSetCurrentWorld(worldId) {
 		return async (dispatch, getState, {apiClient, history}) => {
@@ -76,11 +77,42 @@ class WorldActionFactory {
 					type: LoginActionFactory.SET_CURRENT_USER,
 					user: newUser
 				});
-				dispatch(UIActionFactory.gotoPage('/ui/map', {world: world._id}))
+				dispatch(UIActionFactory.gotoPage('/ui/map', {world: world._id}));
 			} catch (error) {
 				UIActionFactory.showError(error);
 			}
 		};
+	}
+
+	static updateWorld(world){
+		return async (dispatch, getState, { apiClient, history}) => {
+			try {
+				const updatedWorld = await apiClient.updateWorld(world);
+				if(getState().currentWorld && updatedWorld._id === getState().currentWorld._id){
+					dispatch(WorldActionFactory.setCurrentWorld(updatedWorld));
+				}
+			} catch (error) {
+				UIActionFactory.showError(error);
+			}
+		}
+	}
+
+	static userSearch(username){
+		return async (dispatch, getState, { apiClient, history}) => {
+			try {
+				const users = await apiClient.userSearch({displayName: username});
+				dispatch(WorldActionFactory.setUsersFound(users));
+			} catch (error) {
+				UIActionFactory.showError(error);
+			}
+		}
+	}
+
+	static setUsersFound(users){
+		return {
+			type: WorldActionFactory.SET_FOUND_USERS,
+			users: users
+		}
 	}
 
 }

@@ -111,4 +111,27 @@ WikiPageRouter.post('/', passportConfig.loggedInMiddleware, (req, res, next) => 
 	});
 });
 
+WikiPageRouter.delete('/:id', passportConfig.loggedInMiddleware, (req, res, next) => {
+
+	WikiPage.findOne({_id: req.params.id})
+		.populate({
+			path: 'world ',
+			populate: {path: 'owner'}
+		}).exec((err, folder) => {
+		if(err){
+			return res.status(500).json({error: err});
+		}
+		if(!folder.world.userCanWrite(req.user)){
+			return res.status(403).json({error: 'Unauthorized'});
+		}
+
+		WikiPage.deleteOne({_id: req.params.id}).exec((err) => {
+			if(err){
+				return res.status(500).json({error: err});
+			}
+			return res.status(200).send();
+		});
+	});
+});
+
 module.exports = WikiPageRouter;

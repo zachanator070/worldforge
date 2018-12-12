@@ -11,6 +11,7 @@ import SelectWorldModal from "./selectworldmodal";
 import CreateWorldModal from "./createworldmodal";
 import EditPinModal from "./editpinmodal";
 import MapActionFactory from "../../redux/actions/mapactionfactory";
+import WorldPermissionsModal from "./worldpermissionsview";
 
 class Modals extends Component {
 	render(){
@@ -48,6 +49,15 @@ class Modals extends Component {
 					show={this.props.ui.showEditPinModal}
 					showEditPinModal={this.props.showEditPinModal}
 				/>
+				<WorldPermissionsModal
+					updateWorld={this.props.updateWorld}
+					currentWorld={this.props.currentWorld}
+					currentUser={this.props.currentUser}
+					showWorldPermissionModal={this.props.ui.showWorldPermissionModal}
+					setShowWorldPermissionModal={this.props.setShowWorldPermissionModal}
+					userSearch={this.props.userSearch}
+					userSearchResults={this.props.userSearchResults}
+				/>
 			</div>
 		);
 	}
@@ -61,7 +71,8 @@ const mapStateToProps = state => {
 		currentWorld: state.currentWorld,
 		availableWorlds: state.availableWorlds,
 		allWikis: state.allWikis,
-		pinBeingEdited: state.pinBeingEdited
+		pinBeingEdited: state.pinBeingEdited,
+		userSearchResults: state.userSearchResults
 	}
 };
 
@@ -103,6 +114,15 @@ const mapDispatchToProps = dispatch => {
 		tryLogout: () => {
 			dispatch(LoginActionFactory.tryLogout());
 		},
+		updateWorld: (world) => {
+			dispatch(WorldActionFactory.updateWorld(world));
+		},
+		setShowWorldPermissionModal: (show) => {
+			dispatch(UIActionFactory.showWorldPermissionModal(show));
+		},
+		userSearch: (username) => {
+			dispatch(WorldActionFactory.userSearch(username));
+		}
 	}
 };
 

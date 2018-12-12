@@ -21,6 +21,14 @@ class WorldMenu extends Component{
 				<Menu.Item key="1">
 					<a href="#" onClick={() => {this.props.showSelectWorldModal(true)}}>Select World</a>
 				</Menu.Item>
+				{
+					this.props.currentWorld ?
+						<Menu.Item key="2">
+							<a href="#" onClick={() => {this.props.showWorldPermissionModal(true)}}>World Permissions</a>
+						</Menu.Item>
+						: null
+				}
+
 			</Menu>
 		);
 

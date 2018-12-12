@@ -100,6 +100,16 @@ class ApiClient {
 		return await this.jsonOrError(response);
 	}
 
+	async userSearch(params){
+		let response = await fetch(
+			'/api/users?' + Object.entries(params).map(pair => pair[0] + '=' + pair[1]).join('&'),
+			{
+				method: 'GET'
+			}
+		);
+		return await this.jsonOrError(response);
+	}
+
 	async setCurrentWorld(world){
 		let response = await fetch(
 			`/api/users/current`,
@@ -196,7 +206,17 @@ class ApiClient {
 
 	async deleteFolder(folder){
 		let response = await fetch(
-			`/api/wikiFolders${folder._id}`,
+			`/api/wikiFolders/${folder._id}`,
+			{
+				method: 'DELETE',
+			}
+		);
+		return await this.checkForGoodResponse(response);
+	}
+
+	async deleteWikiPage(page){
+		let response = await fetch(
+			`/api/wikiPages/${page._id}`,
 			{
 				method: 'DELETE',
 			}

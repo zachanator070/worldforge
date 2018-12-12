@@ -26,6 +26,28 @@ UsersRouter.get('/:id', (req, res, next) => {
 	);
 });
 
+UsersRouter.get('/', (req, res, next) => {
+
+	const params = {};
+	if(req.query.displayName){
+		params.displayName = { $regex: '^' + req.query.displayName + '.*' , $options: 'i'}
+	}
+
+	User.find(params).exec(function (err, users){
+			if(err){
+				return res.status(500).send(err)
+			}
+			users = users.map((user) => {
+				delete user.password_hash;
+				delete user.email;
+				return user;
+			});
+
+			return res.json(users);
+		}
+	);
+});
+
 UsersRouter.put('/:id', passportConfig.loggedInMiddleware, (req, res, next) => {
 	if(!mongoose.Types.ObjectId(req.params.id).equals(req.user._id)){
 		return res.status(403).json({error: 'Can only change your user'});

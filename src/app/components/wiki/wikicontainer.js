@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import LoginActionFactory from "../../redux/actions/loginactionfactory";
 import UIActionFactory from "../../redux/actions/uiactionfactory";
 import connect from "react-redux/es/connect/connect";
 import {Router, withRouter} from "react-router-dom";
@@ -37,7 +36,7 @@ class Wiki extends Component{
 				<Col span={16}>
 					<Router history={this.props.history}>
 						<Switch>
-							<Route path='/ui/wiki/edit' render={() => {return (<WikiEdit gotoPage={this.props.gotoPage} currentWiki={this.props.currentWiki} saveWiki={this.props.saveWiki}/>);}}/>
+							<Route path='/ui/wiki/edit' render={() => {return (<WikiEdit gotoPage={this.props.gotoPage} currentWiki={this.props.currentWiki} saveWiki={this.props.saveWiki} deleteWikiPage={this.props.deleteWikiPage}/>);}}/>
 							<Route path='/ui/wiki/view' render={() => {return (<WikiView gotoPage={this.props.gotoPage} currentWiki={this.props.currentWiki} currentWorld={this.props.currentWorld}/>);}}/>
 						</Switch>
 					</Router>
@@ -73,8 +72,11 @@ const mapDispatchToProps = dispatch => {
 		createFolder: (folder, parent) => {
 			dispatch(WikiActionFactory.createFolder(folder, parent));
 		},
-		delete: (folder) => {
+		deleteFolder: (folder) => {
 			dispatch(WikiActionFactory.deleteFolder(folder));
+		},
+		deleteWikiPage: (page) => {
+			dispatch(WikiActionFactory.deleteWikiPage(page));
 		},
 	}
 };

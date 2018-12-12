@@ -96,14 +96,19 @@ class RootReducer {
 				return Object.assign({}, state, {
 					showEditPinModal: action.show
 				});
-			case UIActionFactory.SHOW_SESSION_TIMEOUT_MODAL:
-				return Object.assign({}, state, {
-					showEditPinModal: action.show
-				});
 			case UIActionFactory.SET_MAP_UPLOAD_STATUS:
 				return Object.assign({}, state, {
 					mapUploadStatus: action.status
 				});
+			default:
+				return state;
+		}
+	}
+
+	userSearchResultsReducer(state=[], action){
+		switch(action.type) {
+			case WorldActionFactory.SET_FOUND_USERS:
+				return action.users;
 			default:
 				return state;
 		}
@@ -237,6 +242,7 @@ class RootReducer {
 			allWikis: this.allWikisReducer,
 			pinBeingEdited: this.pinBeingEditedReducer,
 			currentGame: this.currentGameReducer,
+			userSearchResults: this.userSearchResultsReducer
 		});
 	}
 }

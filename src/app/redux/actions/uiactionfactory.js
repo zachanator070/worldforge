@@ -16,7 +16,6 @@ class UIActionFactory {
 	static SHOW_RIGHT_DRAWER = 'SHOW_RIGHT_DRAWER';
 	static SHOW_EDIT_PIN_MODAL = 'SHOW_EDIT_PIN_MODAL';
 	static SET_MAP_UPLOAD_STATUS = 'SET_MAP_UPLOAD_STATUS';
-	static SHOW_SESSION_TIMEOUT_MODAL = 'SHOW_SESSION_TIMEOUT_MODAL';
 
 	static showLoginModal(show){
 		return {
@@ -76,7 +75,7 @@ class UIActionFactory {
 	static showWorldPermissionModal(show){
 		return (dispatch, getState, { apiClient, history}) => {
 			dispatch({
-				type: UIActionFactory.SHOW_WORLD_SELECT_MODAL,
+				type: UIActionFactory.SHOW_WORLD_PERMISSION_MODAL,
 				show: show,
 			});
 		}

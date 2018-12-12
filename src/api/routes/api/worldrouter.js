@@ -54,8 +54,11 @@ WorldRouter.get('/', (req, res, next) => {
 WorldRouter.get('/:id', (req, res, next) => {
 	World.findOne({_id: req.params.id})
 		.populate({
-			path: 'owner wikiPage rootFolder',
+			path: 'wikiPage rootFolder',
 			populate: {path: 'coverImage mapImage world pages'}
+		}).populate({
+			path: 'owner readUsers writeUsers',
+			select: '-password_hash'
 		})
 		.exec((err, world) => {
 			if(!(req.user !== undefined && world.userCanRead(req.user)) && !world.public){

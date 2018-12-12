@@ -28,6 +28,9 @@ class MapBreadCrumbs extends Component {
 		const path = [];
 		while(true){
 			const currentPage =this.getWikiPageFromMapId(currentMap._id);
+			if(!currentPage){
+				break;
+			}
 			const currentPin = this.getPinFromPageId(currentPage._id);
 			path.push({
 				name: currentPage.name,
@@ -51,7 +54,7 @@ class MapBreadCrumbs extends Component {
 		}
 
 		return (
-			<div className='breadcrumbs shadow-sm'>
+			<div className='breadcrumbs'>
 				<Breadcrumb>
 					{breadCrumbs}
 				</Breadcrumb>

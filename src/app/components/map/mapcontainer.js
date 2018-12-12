@@ -32,7 +32,12 @@ class Map extends Component {
 	}
 
 	updateWindowDimensions = () => {
-		this.setState({ width: window.innerWidth, height: window.innerHeight - 42});
+		if(this.refs.container){
+			this.setState({ width: this.refs.container.offsetWidth, height: this.refs.container.offsetHeight});
+		}
+		else {
+			this.setState({ width: window.innerWidth, height: window.innerHeight});
+		}
 	};
 
 	getPins = () => {
@@ -97,8 +102,6 @@ class Map extends Component {
 		const pins = this.getPins();
 
 		let canvas = <MapCanvas
-			height={this.state.height}
-			width={this.state.width}
 			setCurrentMapPosition={this.props.setCurrentMapPosition}
 			setCurrentMapZoom={this.props.setCurrentMapZoom}
 			currentMap={this.props.currentMap}
@@ -107,8 +110,8 @@ class Map extends Component {
 				{
 					onClick: (mouseX, mouseY) => {
 						let pin = {
-							x: (mouseX - this.state.width / 2 ) / this.props.currentMap.zoom - this.props.currentMap.x,
-							y: (mouseY - 42 - this.state.height / 2 ) / this.props.currentMap.zoom - this.props.currentMap.y,
+							x: mouseX,
+							y: mouseY,
 							map: this.props.currentMap.image._id
 						};
 						this.props.createPin(pin);
@@ -128,7 +131,7 @@ class Map extends Component {
 		}
 
 		return (
-			<div id='mapContainer' style={{position: 'relative'}} className='overflow-hidden'>
+			<div id='mapContainer' style={{position: 'relative'}} className='overflow-hidden flex-column flex-grow-1' ref='container'>
 				<MapBreadCrumbs
 					gotoPage={this.props.gotoPage}
 					currentWorld={this.props.currentWorld}
@@ -136,22 +139,24 @@ class Map extends Component {
 					allWikis={this.props.allWikis}
 					allPins={this.props.allPins}
 				/>
-				{this.props.displayWiki ?
-					<SlidingDrawer
-						side='left'
-						show={this.props.ui.showLeftDrawer}
-						setShow={this.props.showLeftDrawer}
-						height={this.state.height}
-						maxWidth={this.state.width}
-					>
-						<WikiView
-							gotoPage={this.props.gotoPage}
-							currentWiki={this.props.displayWiki}
-							currentWorld={this.props.currentWorld}
-						/>
-					</SlidingDrawer>
-					: null}
-				{canvas}
+				<div className='flex-grow-1 flex-column'>
+					{this.props.displayWiki ?
+						<SlidingDrawer
+							side='left'
+							show={this.props.ui.showLeftDrawer}
+							setShow={this.props.showLeftDrawer}
+							height={this.state.height}
+							maxWidth={this.state.width}
+						>
+							<WikiView
+								gotoPage={this.props.gotoPage}
+								currentWiki={this.props.displayWiki}
+								currentWorld={this.props.currentWorld}
+							/>
+						</SlidingDrawer>
+						: null}
+					{canvas}
+				</div>
 			</div>
 		);
 	}

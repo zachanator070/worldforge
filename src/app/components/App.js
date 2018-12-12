@@ -28,7 +28,7 @@ class App extends Component {
 		];
 
 		return (
-			<div className='height-100'>
+			<div className='height-100 flex-column'>
 				{header}
 				{content}
 			</div>

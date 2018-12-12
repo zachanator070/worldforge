@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Dropdown, Icon, Menu} from "antd";
+import {Dropdown, Icon, Menu, Modal} from "antd";
 
 class FolderView extends Component {
 
@@ -9,13 +9,28 @@ class FolderView extends Component {
 			selected: null,
 			opened: [],
 			editing: null,
-			newName: null
+			newName: null,
+			mouseOn: null
 		}
 	}
 
-	componentDidUpdate(){
+	componentDidMount() {
+		const currentPagePath = this.findPage(this.props.currentWorld.rootFolder, this.props.currentWiki ? this.props.currentWiki._id : null, []);
+		this.setState({
+			opened: this.state.opened.concat(currentPagePath)
+		});
+	}
+
+	componentDidUpdate(prevProps, prevState){
 		if(this.refs.editing){
 			this.refs.editing.focus();
+		}
+		if(this.props.currentWiki && (!prevProps.currentWiki || this.props.currentWiki._id !== prevProps.currentWiki._id)){
+
+			const currentPagePath = this.findPage(this.props.currentWorld.rootFolder, this.props.currentWiki._id, []);
+			this.setState({
+				opened: this.state.opened.concat(currentPagePath)
+			});
 		}
 	}
 
@@ -42,7 +57,7 @@ class FolderView extends Component {
 		}
 
 		for (let child of folder.children){
-			let childResults = this.findPage(child, wikiId, path.concat([folder]));
+			let childResults = this.findPage(child, wikiId, path.concat([folder._id]));
 			if(childResults.length > 0){
 				return childResults;
 			}
@@ -111,21 +126,16 @@ class FolderView extends Component {
 		}
 	};
 
-	renderFolder = (currentPagePath, folder, indent) => {
-		const menu = <Menu>
-			<Menu.Item key='new page' onClick={() => {this.props.createWiki('New Page', 'article', folder)}}>New Page</Menu.Item>
-			<Menu.Item key='new folder' onClick={() => {this.createFolder(folder)}}>New Folder</Menu.Item>
-			<Menu.Item key='rename' onClick={() => {this.setEditing(folder)}}>Rename</Menu.Item>
-			<Menu.Item key='delete' onClick={() => {this.props.deleteFolder(folder)}}>Delete</Menu.Item>
-		</Menu>;
-		let icon = <Icon type="folder" theme="outlined" />;
+	renderFolder = (folder, indent) => {
+
+		let icon = <Icon type="right" theme="outlined" />;
 		const children = [];
 		const pages = [];
 		// if we are opened, populate children folders and pages then change icon
-		if(this.state.opened.includes(folder._id) || currentPagePath.includes(folder._id)){
-			icon = <Icon type="folder-open" theme="outlined" />;
+		if(this.state.opened.includes(folder._id) ){
+			icon = <Icon type="down" theme="outlined" />;
 			for (let otherFolder of folder.children){
-				children.push(this.renderFolder(currentPagePath, otherFolder, indent + 1));
+				children.push(this.renderFolder(otherFolder, indent + 1));
 			}
 			for (let page of folder.pages){
 
@@ -133,21 +143,40 @@ class FolderView extends Component {
 			}
 		}
 
-		let folderItem = (
-			<a href='#' style={{'marginLeft': 5 * indent + 'px'}} onClick={() => {this.openFolder(folder._id)}}>
-					<span>
-						{icon} {folder.name}
-					</span>
-			</a>
-		);
+		let menu = [
+			<a href='#' key='new page' onClick={() => {this.props.createWiki('New Page', 'article', folder)}}><Icon type="file-add" /></a>,
+			<a href='#' key='new folder' onClick={() => {this.createFolder(folder)}}><Icon type="folder-add" /></a>,
+			<a href='#' key='rename' onClick={() => {this.setEditing(folder)}}><Icon type="edit" /></a>,
+			<a href='#' key='delete' onClick={() => {
+				Modal.confirm({
+					title: 'Confirm Delete',
+					content: `Are you sure you want to delete the folder "${folder.name}? This will delete all content in this folder as well."`,
+					onOk: () => {
+						this.props.deleteFolder(folder)
+					},
+					onCancel: () => {},
+				});
+			}}><Icon type="delete" /></a>
+		];
 
-		if(this.props.currentWorld.canWrite){
-			folderItem = (
-				<Dropdown overlay={menu} trigger={['contextMenu']}>
-					{folderItem}
-				</Dropdown>
-			);
+		if(!this.props.currentWorld.canWrite || this.state.mouseOver !== folder._id){
+			menu = [];
 		}
+
+		let folderItem = (
+			<div
+				className='flex'
+				onMouseEnter={() => {this.setState({mouseOver: folder._id})}}
+				onMouseLeave={() => {this.setState({mouseOver: null})}}
+			>
+				<a href='#' className='flex-grow-1' style={{'marginLeft': 5 * indent + 'px'}} onClick={() => {this.openFolder(folder._id)}}>
+						<span>
+							{icon} {folder.name}
+						</span>
+				</a>
+				{menu}
+			</div>
+		);
 
 		if (folder._id === this.state.editing){
 			folderItem = (
@@ -158,7 +187,7 @@ class FolderView extends Component {
 		}
 
 		return (
-			<div key={folder._id}>
+			<div key={folder._id} style={{fontSize: '17px'}}>
 				{folderItem}
 				{children}
 				{pages}
@@ -167,10 +196,10 @@ class FolderView extends Component {
 	};
 
 	render(){
-		const currentPagePath = this.findPage(this.props.currentWorld.rootFolder, this.props.currentWiki ? this.props.currentWiki._id : null, []);
+
 		const toRender = [];
 		for (let folder of this.props.currentWorld.rootFolder.children){
-			toRender.push(this.renderFolder(currentPagePath, folder, 0));
+			toRender.push(this.renderFolder(folder, 0));
 		}
 		const pages = [];
 		for (let page of this.props.currentWorld.rootFolder.pages){

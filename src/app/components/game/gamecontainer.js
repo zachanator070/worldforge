@@ -33,7 +33,7 @@ class GameView extends Component{
 	}
 
 	updateWindowDimensions = () => {
-		this.setState({ width: window.innerWidth, height: window.innerHeight - 42});
+		this.setState({ width: this.refs.container.offsetWidth, height: this.refs.container.offsetHeight});
 	};
 
 	setSelectedPlace = (place) => {
@@ -73,7 +73,7 @@ class GameView extends Component{
 		}
 
 		return (
-			<div>
+			<div ref='container'>
 				{this.props.displayWiki ?
 					<SlidingDrawer
 						side='left'

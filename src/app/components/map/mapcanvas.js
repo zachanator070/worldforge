@@ -8,8 +8,17 @@ class MapCanvas extends Component {
 		this.state = {
 			lastMouseX: null,
 			lastMouseY: null,
+			width: 0,
+			height: 0,
+			defaultCalculated: true
 		};
 	}
+
+	updateWindowDimensions = () => {
+		if(this.refs.container && (this.refs.container.offsetWidth !== this.state.width || this.refs.container.offsetHeight !== this.state.height)){
+			this.setState({ width: this.refs.container.offsetWidth, height: this.refs.container.offsetHeight, defaultCalculated: false});
+		}
+	};
 
 	updateMapPosition = (evt) => {
 		if(this.state.lastMouseX && this.state.lastMouseY){
@@ -36,19 +45,31 @@ class MapCanvas extends Component {
 			canvas.removeEventListener('mousemove', this.updateMapPosition);
 		}, false);
 
-		this.calcDefaultPosition();
+		this.updateWindowDimensions();
 	}
 
 	componentDidUpdate(prevProps, prevState, snapshot) {
+		this.updateWindowDimensions();
 		if(this.props.currentMap.zoom === 0 || prevProps.currentMap.image._id !== this.props.currentMap.image._id){
+			this.setState({
+				defaultCalculated: false
+			});
+		}
+		if(!this.state.defaultCalculated){
 			this.calcDefaultPosition();
 		}
 	}
 
 	calcDefaultPosition = () => {
-		let smallestRatio = this.props.width / this.props.currentMap.image.width;
-		if(this.props.height / this.props.currentMap.image.height < smallestRatio){
-			smallestRatio = this.props.height / this.props.currentMap.image.height;
+		this.setState({
+			defaultCalculated: true
+		});
+		if(this.state.width === 0 || this.state.height === 0){
+			return;
+		}
+		let smallestRatio = this.state.width / this.props.currentMap.image.width;
+		if(this.state.height / this.props.currentMap.image.height < smallestRatio){
+			smallestRatio = this.state.height / this.props.currentMap.image.height;
 		}
 		this.props.setCurrentMapZoom(smallestRatio);
 		this.props.setCurrentMapPosition(-this.props.currentMap.image.width/2, -this.props.currentMap.image.height/2);
@@ -74,14 +95,21 @@ class MapCanvas extends Component {
 		x *= this.props.currentMap.zoom;
 		y *= this.props.currentMap.zoom;
 
-		x += this.props.width / 2;
-		y += this.props.height / 2;
+		x += this.state.width / 2;
+		y += this.state.height / 2;
 
 		x = Math.floor(x);
 		y = Math.floor(y);
 
 		return [x, y];
 
+	};
+
+	reverseTranslate = (x, y) => {
+		return [
+			(x - this.state.width / 2 ) / this.props.currentMap.zoom - this.props.currentMap.x,
+			(y - this.state.height / 2 ) / this.props.currentMap.zoom - this.props.currentMap.y
+			];
 	};
 
 	getChunks = () => {
@@ -118,7 +146,11 @@ class MapCanvas extends Component {
 		for(let item of this.props.menuItems){
 			menuItems.push(
 				<Menu.Item key={item.name} onClick={() => {
-					item.onClick(this.state.lastMouseX, this.state.lastMouseY);
+					const boundingBox = this.refs.canvas.getBoundingClientRect();
+					const mouseX = this.state.lastMouseX - boundingBox.x;
+					const mouseY = this.state.lastMouseY - boundingBox.y;
+					const coords = this.reverseTranslate(mouseX, mouseY);
+					item.onClick(coords[0], coords[1]);
 				}}>{item.name}</Menu.Item>
 			);
 		}
@@ -149,8 +181,7 @@ class MapCanvas extends Component {
 		let canvas =
 			<div
 				ref='canvas'
-				className='margin-none overflow-hidden'
-				style={{width: this.props.width, height: this.props.height}}
+				className='margin-none overflow-hidden flex-grow-1 position-relative'
 				onWheel={this.handleWheelEvent}
 			>
 				{images}
@@ -161,16 +192,19 @@ class MapCanvas extends Component {
 			const menuItems = this.getDropdownMenu();
 
 			if(menuItems.length > 0){
-				canvas = <Dropdown
-					overlay={
-						<Menu>
-							{menuItems}
-						</Menu>
-					}
-					trigger={['contextMenu']}
-				>
-					{canvas}
-				</Dropdown>;
+				canvas = <div ref='container' className='flex-grow-1 flex-column'>
+					<Dropdown
+						overlay={
+							<Menu>
+								{menuItems}
+							</Menu>
+						}
+						trigger={['contextMenu']}
+					>
+						{canvas}
+					</Dropdown>
+				</div>
+
 			}
 		}
 		return canvas;

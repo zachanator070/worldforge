@@ -52,6 +52,7 @@ class NavBar extends Component {
 								currentWorld={this.props.currentWorld}
 								showCreateWorldModal={this.props.showCreateWorldModal}
 								showSelectWorldModal={this.props.showSelectWorldModal}
+								showWorldPermissionModal={this.props.showWorldPermissionModal}
 							/>
 						</div>
 					</Col>
@@ -126,6 +127,9 @@ const mapDispatchToProps = dispatch => {
 		},
 		showLeftDrawer: (show) => {
 			dispatch(UIActionFactory.showLeftDrawer(show));
+		},
+		showWorldPermissionModal: (show) => {
+			dispatch(UIActionFactory.showWorldPermissionModal(show));
 		}
 	}
 };

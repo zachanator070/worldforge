@@ -150,6 +150,18 @@ class WikiActionFactory{
 		}
 	}
 
+	static deleteWikiPage(page){
+		return async (dispatch, getState, {apiClient, history}) => {
+			try{
+				await apiClient.deleteWikiPage(page);
+				dispatch(WorldActionFactory.getAndSetCurrentWorld(getState().currentWorld._id));
+				dispatch(WikiActionFactory.getAllWikis());
+			} catch(e){
+				UIActionFactory.showError(e);
+			}
+		}
+	}
+
 	static searchWikis(params){
 		return async (dispatch, getState, {apiClient, history}) => {
 			try{
