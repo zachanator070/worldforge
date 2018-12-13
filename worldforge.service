@@ -4,11 +4,11 @@ After=syslog.target network.target
 
 [Service]
 Type=simple
-PIDFile=/var/spool/worldforge/pid/master.pid
-EnvironmentFile=/srv/worldforge/.env
 WorkingDirectory=/srv/worldforge
-ExecStart=/usr/bin/docker-compose up prod
-ExecStop=/usr/bin/docker-compose down
+ExecStart=/usr/bin/make prod
+User=worldforge
+Group=worldforge
+ExecStop=/usr/bin/make down
 
 [Install]
 WantedBy=multi-user.target
