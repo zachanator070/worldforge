@@ -25,7 +25,7 @@ prod-config:
 	cp example.env /etc/worldforge/.env
 
 prod:
-	docker-compose up prod
+	docker-compose up prod mongodb-prod redis-prod
 
 install: prod-config build
 	useradd worldforge

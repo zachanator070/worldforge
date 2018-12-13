@@ -18,15 +18,13 @@ requirements are met with.
 * docker
 * docker-compose
 * make
-* mongodb
-* redis
 
 ```make install```
 
-This command installs a production ready build of the UI, the api server, and a systemd unit file to manage the server.
+This command installs a production ready build of the UI, the api server, and a systemd unit file to manage the service.
 
-NOTE: The docker compose environment installed with this command does not install mongodb or redis.
-These requirements need to be installed by other means.
+NOTE: The  mongodb and redis containers in the prod docker compose environment installed with this command have their persistent data
+stored in the `/srv/worldforge/data/mongodb` and `/srv/worldforge/data/redis` directories.
 
 This container reads the env file `/etc/worldforge/.env` for configuration.
 `example.env` is an example of the supported configuration items and format of this file.

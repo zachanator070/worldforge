@@ -15,8 +15,8 @@ services:
     - "${API_PORT:-3000}:${API_PORT:-3000}"
     - "9229:9229"
     depends_on:
-      - mongodb
-      - redis
+      - mongodb-dev
+      - redis-dev
       - build-dev
     networks:
       - worldforge
@@ -34,7 +34,14 @@ services:
     ports:
     - "${API_PORT:-3000}:${API_PORT:-3000}"
     - "9229:9229"
-    network_mode: "host"
+    depends_on:
+      - mongodb-prod
+      - redis-prod
+    links:
+      - "mongodb-prod:mongodb"
+      - "redis-prod:redis"
+    networks:
+      - worldforge
 
   build-dev:
     build:
@@ -62,19 +69,37 @@ services:
     networks:
      - worldforge
 
-  mongodb:
+  mongodb-dev:
     image: "mongo:latest"
     ports:
       - "27017:27017"
     networks:
     - worldforge
 
-  redis:
+  mongodb-prod:
+    image: "mongo:latest"
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data/mongodb:/data/db
+    networks:
+      - worldforge
+
+  redis-dev:
     image: "redis:latest"
     ports:
     - "6379:6379"
     networks:
     - worldforge
+
+  redis-prod:
+    image: "redis:latest"
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data
+    networks:
+      - worldforge
 
 networks:
   worldforge:
