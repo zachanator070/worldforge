@@ -34,10 +34,6 @@ services:
     ports:
     - "${API_PORT:-3000}:${API_PORT:-3000}"
     - "9229:9229"
-    depends_on:
-    - mongodb
-    - redis
-    - build-prod
     networks:
     - worldforge
 

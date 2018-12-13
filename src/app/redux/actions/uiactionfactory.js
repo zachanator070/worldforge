@@ -42,7 +42,7 @@ class UIActionFactory {
 		}
 	}
 
-	static submitSelectWorldModal(worldId){
+	static  submitSelectWorldModal(worldId){
 		return async (dispatch, getState, {apiClient, history}) => {
 			try{
 				let world = await apiClient.getWorld(worldId);

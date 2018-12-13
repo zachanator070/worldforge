@@ -1,0 +1,14 @@
+[Unit]
+Description=WorldForge DnD Lore System
+After=syslog.target network.target
+
+[Service]
+Type=simple
+PIDFile=/var/spool/worldforge/pid/master.pid
+EnvironmentFile=/srv/worldforge/.env
+WorkingDirectory=/srv/worldforge
+ExecStart=/usr/bin/docker-compose up prod
+ExecStop=/usr/bin/docker-compose down
+
+[Install]
+WantedBy=multi-user.target
