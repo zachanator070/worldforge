@@ -20,6 +20,9 @@ services:
       - build-dev
     networks:
       - worldforge
+    links:
+      - "mongodb-dev:mongodb"
+      - "redis-dev:redis"
 
   prod:
     build:
@@ -27,7 +30,7 @@ services:
       dockerfile: Dockerfile
     command: "npm run start"
     env_file:
-    - /etc/worldforge/.env
+    - .env
     volumes:
     - ./src:/home/node/app/src
     - ./dist:/home/node/app/dist
@@ -61,7 +64,7 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file:
-      - /etc/worldforge/.env
+      - .env
     volumes:
      - ./src:/home/node/app/src
      - ./dist:/home/node/app/dist

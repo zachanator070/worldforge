@@ -9,6 +9,7 @@ import SlidingDrawer from "../slidingdrawer";
 import GameMessenger from "./gamemessenger";
 import WikiView from "../wiki/wikiview";
 import SelectPlace from "../selectplace";
+import MapCanvas from "../map/mapcanvas";
 
 
 class GameView extends Component{
@@ -33,8 +34,14 @@ class GameView extends Component{
 	}
 
 	updateWindowDimensions = () => {
-		this.setState({ width: this.refs.container.offsetWidth, height: this.refs.container.offsetHeight});
+		if(this.refs.container && (this.refs.container.offsetWidth !== this.state.width || this.refs.container.offsetHeight !== this.state.height)){
+			this.setState({ width: this.refs.container.offsetWidth, height: this.refs.container.offsetHeight});
+		}
 	};
+
+	componentDidUpdate(prevProps, prevState, snapshot) {
+		this.updateWindowDimensions();
+	}
 
 	setSelectedPlace = (place) => {
 		this.setState({
@@ -68,12 +75,22 @@ class GameView extends Component{
 			);
 		}
 
-		if(this.state.width === 0){
-			return null;
-		}
+		let canvas = this.props.currentGame && this.props.currentGame.game && this.props.currentGame.game.mapImage && this.props.currentGame.game.mapImage.chunks ? <MapCanvas
+			setCurrentMapPosition={this.props.setGameMapPosition}
+			setCurrentMapZoom={this.props.setGameMapZoom}
+			currentMap={{
+				x: this.props.currentGame.x,
+				y: this.props.currentGame.y,
+				zoom: this.props.currentGame.zoom,
+				image: this.props.currentGame.game.mapImage,
+				chunks: this.props.currentGame.game.mapImage.chunks
+			}}
+			currentWorld={this.props.currentWorld}
+		/> :
+			<div className='text-align-center'><h2>No Map Selected</h2></div>;
 
 		return (
-			<div ref='container'>
+			<div ref='container' style={{position: 'relative'}} className='overflow-hidden flex-column flex-grow-1'>
 				{this.props.displayWiki ?
 					<SlidingDrawer
 						side='left'
@@ -89,9 +106,7 @@ class GameView extends Component{
 						/>
 					</SlidingDrawer>
 					: null}
-				<div style={{display: 'inline'}}>
-					Map ID: {this.props.currentGame.game.mapImage ? this.props.currentGame.game.mapImage._id: null}
-				</div>
+				{canvas}
 
 				<SlidingDrawer
 					side='right'
@@ -174,6 +189,12 @@ const mapDispatchToProps = dispatch => {
 		},
 		setMap: (imageId) => {
 			dispatch(GameActionFactory.setMap(imageId))
+		},
+		setGameMapPosition: (x, y) => {
+			dispatch(GameActionFactory.setGameMapPosition(x, y));
+		},
+		setGameMapZoom: (zoom) => {
+			dispatch(GameActionFactory.setGameMapZoom(zoom));
 		}
 	}
 };

@@ -35,7 +35,7 @@
   },
   "scripts": {
     "start": "nodejs src/api/index.js",
-    "start-dev": "npx nodemon --delay 80ms --inspect=0.0.0.0 src/api/index.js",
+    "start-dev": "npx nodemon --delay 500ms --inspect=0.0.0.0 src/api/index.js",
     "build": "npx webpack --mode production",
     "watch": "npx webpack --mode development -w"
   },

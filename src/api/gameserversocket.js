@@ -8,6 +8,9 @@ class GameServerSocket {
 	}
 
 	populateGame(game, callback){
+		if(!game){
+			return;
+		}
 		game.populate({
 			path: 'mapImage',
 			populate:{

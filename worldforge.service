@@ -6,9 +6,8 @@ After=syslog.target network.target
 Type=simple
 WorkingDirectory=/srv/worldforge
 ExecStart=/usr/bin/make prod
-User=worldforge
-Group=worldforge
 ExecStop=/usr/bin/make down
+Restart=always
 
 [Install]
 WantedBy=multi-user.target

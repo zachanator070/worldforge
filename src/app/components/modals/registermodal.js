@@ -85,7 +85,7 @@ class RegisterModal extends Component {
 								onChange={this.updatePassword}
 								type='password'/>
 						</Form.Item>
-						<Form.Item label="Password" {...formItemLayout} >
+						<Form.Item label="Repeat Password" {...formItemLayout} >
 							<Input
 								placeholder="$up3r$3cr37"
 								prefix={<Icon type="key" style={{ color: 'rgba(0,0,0,.25)' }} />}

@@ -1,7 +1,9 @@
-dev-config:
+
+
+config:
 	touch .env
 
-dev: dev-config
+dev: config
 	docker-compose up -d dev && docker-compose logs -f
 
 down:
@@ -20,19 +22,13 @@ stop:
 build:
 	docker-compose up build-prod
 
-prod-config:
-	- mkdir /etc/worldforge
-	cp example.env /etc/worldforge/.env
-
 prod:
 	docker-compose up prod mongodb-prod redis-prod
 
-install: prod-config build
-	useradd worldforge
-	usermod -G docker worldforge
+install: config build
 	mkdir /srv/worldforge
 	cp -r . /srv/worldforge
-	chown -R worldforge:worldforge /srv/worldforge
+	cp ./example.env /srv/worldforge/.env
 	install -m 644 worldforge.service /lib/systemd/system/worldforge.service
 	systemctl daemon-reload
 	systemctl enable worldforge
@@ -44,5 +40,3 @@ remove:
 	- rm /lib/systemd/system/worldforge.service
 	- systemctl daemon-reload
 	- rm -rf /srv/worldforge
-	- rm -rf /etc/worldforge
-	- userdel worldforge

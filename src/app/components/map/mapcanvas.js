@@ -61,12 +61,14 @@ class MapCanvas extends Component {
 	}
 
 	calcDefaultPosition = () => {
-		this.setState({
-			defaultCalculated: true
-		});
 		if(this.state.width === 0 || this.state.height === 0){
 			return;
 		}
+
+		this.setState({
+			defaultCalculated: true
+		});
+
 		let smallestRatio = this.state.width / this.props.currentMap.image.width;
 		if(this.state.height / this.props.currentMap.image.height < smallestRatio){
 			smallestRatio = this.state.height / this.props.currentMap.image.height;
@@ -143,7 +145,7 @@ class MapCanvas extends Component {
 
 	getDropdownMenu = () => {
 		const menuItems = [];
-		for(let item of this.props.menuItems){
+		for(let item of this.props.menuItems || []){
 			menuItems.push(
 				<Menu.Item key={item.name} onClick={() => {
 					const boundingBox = this.refs.canvas.getBoundingClientRect();
@@ -169,7 +171,7 @@ class MapCanvas extends Component {
 
 		const extras = [];
 
-		for(let extra of this.props.extras){
+		for(let extra of this.props.extras || []){
 			const coords = this.translate(extra.x, extra.y);
 			extras.push(
 				extra.render(coords[0], coords[1])
@@ -179,12 +181,14 @@ class MapCanvas extends Component {
 		images = images.concat(extras);
 
 		let canvas =
-			<div
-				ref='canvas'
-				className='margin-none overflow-hidden flex-grow-1 position-relative'
-				onWheel={this.handleWheelEvent}
-			>
-				{images}
+			<div ref='container' className='flex-grow-1 flex-column'>
+				<div
+					ref='canvas'
+					className='margin-none overflow-hidden flex-grow-1 position-relative'
+					onWheel={this.handleWheelEvent}
+				>
+					{images}
+				</div>
 			</div>;
 
 		if(this.props.currentWorld.canWrite){

@@ -32,13 +32,14 @@ class Map extends Component {
 	}
 
 	updateWindowDimensions = () => {
-		if(this.refs.container){
+		if(this.refs.container && (this.refs.container.offsetWidth !== this.state.width || this.refs.container.offsetHeight !== this.state.height)){
 			this.setState({ width: this.refs.container.offsetWidth, height: this.refs.container.offsetHeight});
 		}
-		else {
-			this.setState({ width: window.innerWidth, height: window.innerHeight});
-		}
 	};
+
+	componentDidUpdate(prevProps, prevState, snapshot) {
+		this.updateWindowDimensions();
+	}
 
 	getPins = () => {
 		let pins =  [];
@@ -80,12 +81,17 @@ class Map extends Component {
 							key={pin._id}
 							overlayStyle={{zIndex: '3'}}
 						>
-							<Icon
-								type="pushpin"
-								style={{position: 'absolute', left: x, top: y - 50, fontSize: '50px', zIndex: 1, color:'red'}}
-								theme='filled'
-								draggable="false"
-							/>
+							<div style={{
+								position: 'absolute',
+								left: x - 5,
+								top: y - 5,
+								zIndex: 1,
+								borderRadius: "50%",
+								width: "15px",
+								height: "15px",
+								backgroundColor: "crimson",
+								border: "3px solid powderblue"
+							}}/>
 						</Popover>
 					);
 				}
@@ -131,7 +137,7 @@ class Map extends Component {
 		}
 
 		return (
-			<div id='mapContainer' style={{position: 'relative'}} className='overflow-hidden flex-column flex-grow-1' ref='container'>
+			<div id='mapContainer' ref='container' style={{position: 'relative'}} className='overflow-hidden flex-column flex-grow-1'>
 				<MapBreadCrumbs
 					gotoPage={this.props.gotoPage}
 					currentWorld={this.props.currentWorld}

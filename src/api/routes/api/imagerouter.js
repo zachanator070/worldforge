@@ -26,9 +26,10 @@ ImageRouter.post('/', passportConfig.loggedInMiddleware, (req, res, next) => {
 	if('chunkImage' in req.body){
 		chunkImage = req.body.chunkImage === 'true';
 	}
-
+	console.time('jimp read image');
 	Jimp.read(req.files.data.data)
 		.then(image => {
+			console.timeEnd('jimp read image');
 			newImageSchema.width = image.bitmap.width;
 			newImageSchema.height = image.bitmap.height;
 			let x = 0;
@@ -80,12 +81,12 @@ ImageRouter.post('/', passportConfig.loggedInMiddleware, (req, res, next) => {
 
 			const chunkPromises = [];
 
+			console.time('chunkify');
 			for(let job of chunkJobs){
 				chunkPromises.push(new Promise((resolve, reject) => {
 
 					Jimp.read(job.image).then((copy) => {
 						copy.crop( job.x * chunkSize, job.y * chunkSize, job.width, job.height);
-						// image.bitmap.width, image.bitmap.height, image.bitmap.data, req.files.data.name;
 						const newFilename = `chunk.${job.x}.${job.y}.${req.files.data.name}`;
 						const writeStream = gfs.createWriteStream({
 							filename: newFilename,
@@ -114,6 +115,7 @@ ImageRouter.post('/', passportConfig.loggedInMiddleware, (req, res, next) => {
 			}
 
 			Promise.all(chunkPromises).then((chunks) => {
+				console.timeEnd('chunkify');
 				newImageSchema.chunks = chunks.map((chunk) => { return chunk._id; });
 				Image.create(newImageSchema, (err, newImage) => {
 					const createChunkPromises = [];
@@ -127,7 +129,9 @@ ImageRouter.post('/', passportConfig.loggedInMiddleware, (req, res, next) => {
 							if(err){
 								return res.status(500).json({error: err.message});
 							}
+							console.time('create icon');
 							makeIcon(req, newImage._id).then((icon) => {
+								console.timeEnd('create icon');
 								return res.redirect(303, `/api/images/${newImage._id}`);
 							}).catch((error) => {
 								return res.status(500).json({error: error.message});

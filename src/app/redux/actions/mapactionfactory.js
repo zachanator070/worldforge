@@ -35,6 +35,7 @@ class MapActionFactory {
 			map: map
 		}
 	}
+
 	static setCurrentMapPosition(x, y){
 		return {
 			type: MapActionFactory.SET_CURRENT_MAP_POSITION,
