@@ -82,7 +82,7 @@ services:
   mongodb-prod:
     image: "mongo:latest"
     ports:
-      - "27017:27017"
+      - "27017"
     volumes:
       - ./data/mongodb:/data/db
     networks:
@@ -98,7 +98,7 @@ services:
   redis-prod:
     image: "redis:latest"
     ports:
-      - "6379:6379"
+      - "6379"
     volumes:
       - ./data/redis:/data
     networks:
