@@ -159,6 +159,7 @@ class Map extends Component {
 								gotoPage={this.props.gotoPage}
 								currentWiki={this.props.displayWiki}
 								currentWorld={this.props.currentWorld}
+								allPins={this.props.allPins}
 							/>
 						</SlidingDrawer>
 						: null}

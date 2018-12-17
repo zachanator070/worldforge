@@ -50,38 +50,64 @@ class WikiView extends Component{
 		}
 	};
 
+	getPinFromPageId = (pageId) => {
+		for(let pin of this.props.allPins){
+			if(pin.page && pin.page._id === pageId){
+				return pin;
+			}
+		}
+	};
+
 	render(){
 		if(!this.props.currentWiki){
 			return (<div>No Wiki Selected</div>);
 		}
+
 		let coverImage = null;
 		if (this.props.currentWiki.coverImage){
 			coverImage = <div className='padding-md'>
 				<ScaledImage width={this.state.width} height={this.state.height} src={`/api/chunks/data/${this.props.currentWiki.coverImage.chunks[0]._id}`}/>
 			</div>;
 		}
+
 		let mapIcon = null;
 		if (this.props.currentWiki.type === 'place' && this.props.currentWiki.mapImage){
 			mapIcon = <div>
 				<ScaledImage width={this.state.width} height={this.state.height} src={`/api/chunks/data/${this.props.currentWiki.mapImage.icon.chunks[0]._id}`}/>
 				<span className='margin-md-left'>
 					<a href='#' onClick={() => {this.props.gotoPage('/ui/map', {map: this.props.currentWiki.mapImage._id});}}>
-						<Icon type="export" />
+						Go to Map <Icon type="export" />
 					</a>
 				</span>
 			</div>;
 		}
+
+		let gotoMap = null;
+		let pin = this.getPinFromPageId(this.props.currentWiki._id);
+		if(pin){
+			gotoMap = <a href='#' onClick={() => {this.props.gotoPage('/ui/map', {map: pin.map._id});}}>
+				See on map <Icon type="export" />
+			</a>;
+		}
+
 		return (
 			<div ref='wikiView' className='margin-md-top'>
 				{coverImage}
 				<h1>{this.props.currentWiki.name}</h1>
+				{gotoMap}
 				<h2>{this.props.currentWiki.type}</h2>
 				{mapIcon}
 				<div className='padding-md'>
 					<div id='editor'></div>
 				</div>
 				<div className='padding-md'>
-					{this.props.currentWorld.canWrite ? <a href='#' onClick={() => {this.props.gotoPage('/ui/wiki/edit', {wiki: this.props.currentWiki._id})}}><Icon type="edit" theme="outlined" />Edit</a> : null}
+					{this.props.currentWorld.canWrite ?
+						<a href='#' onClick={() => {this.props.gotoPage('/ui/wiki/edit', {wiki: this.props.currentWiki._id})}}>
+							<Icon type="edit" theme="outlined" />Edit
+						</a>
+						:
+						null
+					}
 				</div>
 			</div>
 		);

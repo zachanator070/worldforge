@@ -37,7 +37,7 @@ class Wiki extends Component{
 					<Router history={this.props.history}>
 						<Switch>
 							<Route path='/ui/wiki/edit' render={() => {return (<WikiEdit gotoPage={this.props.gotoPage} currentWiki={this.props.currentWiki} saveWiki={this.props.saveWiki} deleteWikiPage={this.props.deleteWikiPage}/>);}}/>
-							<Route path='/ui/wiki/view' render={() => {return (<WikiView gotoPage={this.props.gotoPage} currentWiki={this.props.currentWiki} currentWorld={this.props.currentWorld}/>);}}/>
+							<Route path='/ui/wiki/view' render={() => {return (<WikiView gotoPage={this.props.gotoPage} currentWiki={this.props.currentWiki} currentWorld={this.props.currentWorld} allPins={this.props.allPins}/>);}}/>
 						</Switch>
 					</Router>
 				</Col>
@@ -51,7 +51,8 @@ class Wiki extends Component{
 const mapStateToProps = state => {
 	return {
 		currentWorld: state.currentWorld,
-		currentWiki: state.currentWiki
+		currentWiki: state.currentWiki,
+		allPins: state.allPins
 	}
 };
 

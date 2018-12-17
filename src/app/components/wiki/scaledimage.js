@@ -12,8 +12,21 @@ class ScaledImage extends Component {
 	}
 
 	onImgLoad = ({target:img}) => {
-		const height = img.naturalHeight;
-		const width = img.naturalWidth;
+		this.resize();
+	};
+
+	componentDidUpdate(prevProps, prevState, snapshot) {
+		if(prevState.width !== this.state.width || prevState.height !== this.state.height || prevProps.width !== this.props.width || prevProps.height !== this.props.height){
+			this.resize();
+		}
+	}
+
+	resize = () => {
+		if(this.props.width === 0 || this.props.height === 0 || !this.refs.scaledImage){
+			return;
+		}
+		const height = this.refs.scaledImage.naturalHeight;
+		const width = this.refs.scaledImage.naturalWidth;
 		const widthScale = this.props.width/width;
 		const heightScale = this.props.height/height;
 		let biggestScale = widthScale;
@@ -26,12 +39,12 @@ class ScaledImage extends Component {
 		this.setState({
 			width: width * biggestScale,
 			height: height * biggestScale
-		})
-	};
+		});
+	}
 
 	render(){
 		return(
-			<img alt='' style={{width: this.state.width, height: this.state.height}} onLoad={this.onImgLoad} src={this.props.src}/>
+			<img alt='' ref='scaledImage' style={{width: this.state.width, height: this.state.height}} onLoad={this.onImgLoad} src={this.props.src}/>
 		);
 	}
 }
