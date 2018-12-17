@@ -18,11 +18,9 @@ const imageSchema = Schema({
 	},
 	chunkWidth: {
 		type: Number,
-		required: [true, 'chunkWidth required']
 	},
 	chunkHeight: {
 		type: Number,
-		required: [true, 'chunkHeight required']
 	},
 	chunks: [{
 		type: mongoose.Schema.ObjectId,

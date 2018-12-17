@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import {Col, Divider, List, Row} from "antd";
-import ScaledImage from "./wiki/scaledimage";
 
 class SelectPlace extends Component {
 	getListItemComponent = (item) => {

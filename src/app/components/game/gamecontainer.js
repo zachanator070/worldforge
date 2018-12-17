@@ -83,9 +83,11 @@ class GameView extends Component{
 				y: this.props.currentGame.y,
 				zoom: this.props.currentGame.zoom,
 				image: this.props.currentGame.game.mapImage,
-				chunks: this.props.currentGame.game.mapImage.chunks
 			}}
 			currentWorld={this.props.currentWorld}
+			getAndSetMap={() => {
+
+			}}
 		/> :
 			<div className='text-align-center'><h2>No Map Selected</h2></div>;
 

@@ -2,8 +2,6 @@ import UIActionFactory from "./uiactionfactory";
 
 class MapActionFactory {
 	static SET_CURRENT_MAP = 'SET_CURRENT_MAP';
-	static ADD_CHUNK = 'ADD_CHUNK';
-	static SET_CURRENT_MAP_CHUNKS = 'SET_CURRENT_MAP_CHUNKS';
 	static SET_CURRENT_MAP_POSITION = 'SET_CURRENT_MAP_POSITION';
 	static SET_CURRENT_MAP_ZOOM = 'SET_CURRENT_MAP_ZOOM';
 	static SET_PINS = 'SET_PINS';
@@ -14,19 +12,10 @@ class MapActionFactory {
 			try{
 				const mapImage = await apiClient.getImage(mapId);
 				dispatch(MapActionFactory.setMap(mapImage));
-				const chunks = await apiClient.getChunks(mapImage._id);
-				dispatch(MapActionFactory.setCurrentMapChunks(chunks));
 			} catch (e){
 				UIActionFactory.showError(e)
 			}
 		};
-	}
-
-	static setCurrentMapChunks(chunks){
-		return {
-			type: MapActionFactory.SET_CURRENT_MAP_CHUNKS,
-			chunks: chunks
-		}
 	}
 
 	static setMap(map){

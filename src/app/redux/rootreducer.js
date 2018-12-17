@@ -116,7 +116,6 @@ class RootReducer {
 
 	currentMapReducer(state = {
 		image: null,
-		chunks: [],
 		x: 0,
 		y: 0,
 		zoom: 1,
@@ -126,10 +125,6 @@ class RootReducer {
 			case MapActionFactory.SET_CURRENT_MAP:
 				return Object.assign({}, state, {
 					image: action.map
-				});
-			case MapActionFactory.SET_CURRENT_MAP_CHUNKS:
-				return Object.assign({}, state, {
-					chunks: action.chunks
 				});
 			case MapActionFactory.SET_CURRENT_MAP_POSITION:
 				return Object.assign({}, state, {

@@ -116,7 +116,7 @@ class MapCanvas extends Component {
 
 	getChunks = () => {
 		let chunks = [];
-		for (let chunk of this.props.currentMap.chunks){
+		for (let chunk of this.props.currentMap.image.chunks){
 
 			const coordinates = this.translate(chunk.x * 250, chunk.y * 250);
 			const x = coordinates[0];
@@ -166,6 +166,12 @@ class MapCanvas extends Component {
 		}
 		if(!this.props.currentWorld){
 			return <div>No Current World</div>;
+		}
+		if(this.props.currentMap.image.chunks.length < this.props.currentMap.image.chunkHeight * this.props.currentMap.image.chunkWidth){
+			setTimeout(() => {
+				this.props.getAndSetMap(this.props.currentMap.image._id);
+			}, 10000);
+			return <div className='text-align-center margin-lg'><Icon type="loading" style={{ fontSize: 24, marginRight: '15px' }} spin />Map is rendering. This may take a few minutes...</div>;
 		}
 		let images = this.getChunks();
 

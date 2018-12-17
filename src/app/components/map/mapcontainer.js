@@ -126,6 +126,7 @@ class Map extends Component {
 				}
 			]}
 			extras={pins}
+			getAndSetMap={this.props.getAndSetMap}
 		/>;
 
 		if(!this.props.currentMap.image){
@@ -211,6 +212,9 @@ const mapDispatchToProps = dispatch => {
 		},
 		setMapUploadStatus: (status) => {
 			dispatch(UIActionFactory.setMapUploadStatus(status));
+		},
+		getAndSetMap: (mapId) => {
+			dispatch(MapActionFactory.getAndSetMap(mapId));
 		}
 	}
 };

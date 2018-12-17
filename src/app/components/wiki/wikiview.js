@@ -73,9 +73,9 @@ class WikiView extends Component{
 		}
 		return (
 			<div ref='wikiView' className='margin-md-top'>
+				{coverImage}
 				<h1>{this.props.currentWiki.name}</h1>
 				<h2>{this.props.currentWiki.type}</h2>
-				{coverImage}
 				{mapIcon}
 				<div className='padding-md'>
 					<div id='editor'></div>

@@ -13,137 +13,50 @@ const chunkSize = 250;
 
 ImageRouter.post('/', passportConfig.loggedInMiddleware, (req, res, next) => {
 
-	const gfs = Grid(mongoose.connection.db, mongoose.mongo);
-	const newImageSchema = {
-		name: req.files.data.name,
-		chunkList: [],
-		world: req.user.currentWorld,
-		chunkHeight: 0,
-		chunkWidth: 0
-	};
-
-	let chunkImage = true;
+	let chunkify = true;
 	if('chunkImage' in req.body){
-		chunkImage = req.body.chunkImage === 'true';
+		chunkify = req.body.chunkImage === 'true';
 	}
 	console.time('jimp read image');
 	Jimp.read(req.files.data.data)
 		.then(image => {
-			console.timeEnd('jimp read image');
-			newImageSchema.width = image.bitmap.width;
-			newImageSchema.height = image.bitmap.height;
-			let x = 0;
-			let y = 0;
-			let chunkJobs = [];
-			if(!chunkImage){
-				chunkJobs.push({
-					image: image,
-					width: image.bitmap.width,
-					height: image.bitmap.height,
-					x: 0,
-					y: 0
-				});
-				newImageSchema.chunkHeight = 1;
-				newImageSchema.chunkWidth = 1;
-			}
-			else {
-				while(image.bitmap.width - x * chunkSize > 0){
-					while( image.bitmap.height - y * chunkSize > 0){
 
-						let width = chunkSize;
-						let height = chunkSize;
-						if(x * chunkSize + width > image.bitmap.width){
-							width = image.bitmap.width - x * chunkSize;
-						}
-						if(y * chunkSize + height > image.bitmap.height){
-							height = image.bitmap.height - y * chunkSize;
-						}
-
-						chunkJobs.push({
-							image: image,
-							width: width,
-							height: height,
-							x: x,
-							y: y
-						});
-
-						y++;
-						if(y > newImageSchema.chunkHeight){
-							newImageSchema.chunkHeight++;
-						}
-					}
-					y=0;
-					x++;
-					newImageSchema.chunkWidth = x;
+			Image.create({
+				name: req.files.data.name,
+				chunkList: [],
+				world: req.user.currentWorld,
+				width: image.bitmap.width,
+				height: image.bitmap.height
+			}, (err, newImage) => {
+				console.timeEnd('jimp read image');
+				if(err){
+					return res.status(500).json({error: err.message})
 				}
-			}
 
-
-			const chunkPromises = [];
-
-			console.time('chunkify');
-			for(let job of chunkJobs){
-				chunkPromises.push(new Promise((resolve, reject) => {
-
-					Jimp.read(job.image).then((copy) => {
-						copy.crop( job.x * chunkSize, job.y * chunkSize, job.width, job.height);
-						const newFilename = `chunk.${job.x}.${job.y}.${req.files.data.name}`;
-						const writeStream = gfs.createWriteStream({
-							filename: newFilename,
-							content_type: req.files.data.mimetype
-						});
-
-						writeStream.on('close', (file) => {
-							const chunkSchema = {
-								x: job.x,
-								y: job.y,
-								width: job.width,
-								height: job.height,
-								fileId: file._id
-							};
-							resolve(chunkSchema);
-						});
-						writeStream.on('error', function (err) {
-							reject(err);
-						});
-						copy.getBuffer(req.files.data.mimetype, (err, buffer) => {
-							writeStream.end(buffer);
+				try {
+					if(!chunkify){
+						createChunk(0, 0, image.bitmap.height, image.bitmap.width, image, newImage);
+						newImage.chunkHeight = 1;
+						newImage.chunkWidth = 1;
+					}
+					else {
+						createChunkRecurse(0, 0, image, newImage);
+						newImage.chunkHeight = Math.ceil(image.bitmap.height/chunkSize);
+						newImage.chunkWidth = Math.ceil(image.bitmap.width/chunkSize);
+					}
+					newImage.save((err) => {
+						if(err){
+							return res.status(500).json({error: err.message});
+						}
+						makeIcon(req, newImage._id).then((icon) => {
+							return res.redirect(303, `/api/images/${newImage._id}`);
+						}).catch((error) => {
+							return res.status(500).json({error: error.message});
 						});
 					});
-
-				}));
-			}
-
-			Promise.all(chunkPromises).then((chunks) => {
-				console.timeEnd('chunkify');
-				newImageSchema.chunks = chunks.map((chunk) => { return chunk._id; });
-				Image.create(newImageSchema, (err, newImage) => {
-					const createChunkPromises = [];
-					for (let chunk of chunks){
-						chunk.image = newImage._id;
-						createChunkPromises.push(Chunk.create(chunk));
-					}
-					Promise.all(createChunkPromises).then((chunks) => {
-						newImage.chunks = chunks.map((chunk) => { return chunk._id; });
-						newImage.save(err => {
-							if(err){
-								return res.status(500).json({error: err.message});
-							}
-							console.time('create icon');
-							makeIcon(req, newImage._id).then((icon) => {
-								console.timeEnd('create icon');
-								return res.redirect(303, `/api/images/${newImage._id}`);
-							}).catch((error) => {
-								return res.status(500).json({error: error.message});
-							});
-						});
-					}).catch((err) => {
-						return res.status(500).json({error: err.message});
-					})
-
-				});
-			}).catch( err => {
-				return res.status(500).json({error: err.message})
+				} catch (err) {
+					return res.status(500).json({error: err.message});
+				}
 			});
 		})
 		.catch(err => {
@@ -152,23 +65,74 @@ ImageRouter.post('/', passportConfig.loggedInMiddleware, (req, res, next) => {
 
 });
 
-ImageRouter.get('/:id', (req, res, next) => {
-	Image.findOne({_id: req.params.id}).populate({
-		path: 'world owner wikiPage chunks',
-		populate: {path: 'coverImage mapImage world'}
-	}).exec((err, image) => {
+function createChunkRecurse(x, y, image, parentImage){
+	const xOk = image.bitmap.width - x * chunkSize > 0;
+	const yOk = image.bitmap.height - y * chunkSize > 0;
+	let width = chunkSize;
+	let height = chunkSize;
+	if(x * chunkSize + width > image.bitmap.width){
+		width = image.bitmap.width - x * chunkSize;
+	}
+	if(y * chunkSize + height > image.bitmap.height){
+		height = image.bitmap.height - y * chunkSize;
+	}
+	if(!yOk){
+		return;
+	}
+	if(xOk) {
+		createChunk(x, y, height, width, image, parentImage).then(() => {
+			createChunkRecurse(x + 1, y , image, parentImage);
+		});
+	} else if(yOk) {
+		createChunkRecurse(0, y + 1 , image, parentImage);
+	}
+}
 
-		if(!image){
-			return res.status(404).send();
-		}
+function createChunk(x, y, height, width, image, parentImage){
+	return new Promise((resolve, reject) => {
+		const gfs = Grid(mongoose.connection.db, mongoose.mongo);
 
-		if((req.user && !image.world.userCanRead(req.user)) && !image.world.public){
-			return res.status(403).json({error: 'You do not have permission to read'});
-		}
+		console.time(`createChunk.${parentImage._id}.${x}.${y}`);
+		Jimp.read(image).then((copy) => {
+			copy.crop( x * chunkSize, y * chunkSize, width, height);
+			const newFilename = `chunk.${x}.${y}.${parentImage.name}`;
+			const writeStream = gfs.createWriteStream({
+				filename: newFilename,
+				content_type: image.getMIME()
+			});
 
-		res.json(image);
+			writeStream.on('close', (file) => {
+
+				Chunk.create({
+					x: x,
+					y: y,
+					width: width,
+					height: height,
+					fileId: file._id,
+					image: parentImage._id
+				}, (err, chunk) => {
+					Image.findOneAndUpdate({_id: parentImage._id}, {$push: {chunks: chunk._id}}, {new: true}, (err, image) => {
+						console.timeEnd(`createChunk.${parentImage._id}.${x}.${y}`);
+						resolve();
+						if(err){
+							reject(err);
+							throw err;
+						}
+					});
+				});
+			});
+
+
+			writeStream.on('error', (err) => {
+				reject(err);
+				throw err;
+			});
+			copy.getBuffer(image.getMIME(), (err, buffer) => {
+				writeStream.end(buffer);
+			});
+		});
 	});
-});
+}
 
 function makeIcon(req, newImageId) {
 	return new Promise((resolve, reject) => {
@@ -245,7 +209,24 @@ function makeIcon(req, newImageId) {
 				});
 		});
 	});
-
 }
+
+ImageRouter.get('/:id', (req, res, next) => {
+	Image.findOne({_id: req.params.id}).populate({
+		path: 'world owner wikiPage chunks',
+		populate: {path: 'coverImage mapImage world'}
+	}).exec((err, image) => {
+
+		if(!image){
+			return res.status(404).send();
+		}
+
+		if((req.user && !image.world.userCanRead(req.user)) && !image.world.public){
+			return res.status(403).json({error: 'You do not have permission to read'});
+		}
+
+		res.json(image);
+	});
+});
 
 module.exports = ImageRouter;
