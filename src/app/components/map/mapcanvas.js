@@ -35,6 +35,9 @@ class MapCanvas extends Component {
 	componentDidMount(){
 		const canvas = this.refs.canvas;
 		canvas.addEventListener('mousedown', (mousedownEvent) => {
+			if(mousedownEvent.button !== 0){
+				return;
+			}
 			this.setState({
 				lastMouseX: mousedownEvent.clientX,
 				lastMouseY: mousedownEvent.clientY
