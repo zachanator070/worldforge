@@ -190,6 +190,7 @@ div.ant-upload-list-item{
 	border-right: thin lightgrey solid;
 	border-left: thin lightgrey solid;
 	background-color: white;
+	overflow: auto;
 }
 
 .drawer-button {

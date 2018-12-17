@@ -34,6 +34,11 @@ install: config build
 	systemctl enable worldforge
 	systemctl start worldforge
 
+upgrade: build
+	systemctl stop worldforge
+	cp -r . /srv/worldforge
+	systemctl start worldforge
+
 remove:
 	- systemctl stop worldforge
 	- systemctl disable worldforge

@@ -61,11 +61,14 @@ WorldRouter.get('/:id', (req, res, next) => {
 			select: '-password_hash'
 		})
 		.exec((err, world) => {
+			if(!world){
+				return res.status(404).json({error: 'Cannot find world'});
+			}
 			if(!(req.user !== undefined && world.userCanRead(req.user)) && !world.public){
-				return res.status(403).json({error: 'You do not have permission to read'})
+				return res.status(403).json({error: 'You do not have permission to read'});
 			}
 			if(err){
-				return res.status(500).json({error: err.message})
+				return res.status(500).json({error: err.message});
 			}
 
 			world = world.toObject();
