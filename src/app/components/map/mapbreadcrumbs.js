@@ -40,7 +40,9 @@ class MapBreadCrumbs extends Component {
 			if(currentPage._id === this.props.currentWorld.wikiPage._id){
 				break;
 			}
-
+			if(!currentPin){
+				break;
+			}
 			currentMap = currentPin.map;
 		}
 

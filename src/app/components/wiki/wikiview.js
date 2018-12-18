@@ -44,8 +44,8 @@ class WikiView extends Component{
 				"toolbar": false
 			}
 		};
-		this.editor = new Quill('#editor', options);
 		if(this.props.currentWiki.content){
+			this.editor = new Quill('#viewer', options);
 			this.editor.setContents(this.props.currentWiki.content);
 		}
 	};
@@ -97,9 +97,13 @@ class WikiView extends Component{
 				{gotoMap}
 				<h2>{this.props.currentWiki.type}</h2>
 				{mapIcon}
-				<div className='padding-md'>
-					<div id='editor'></div>
-				</div>
+				{this.props.currentWiki.content ?
+					<div className='padding-md'>
+						<div id='viewer'></div>
+					</div>
+					:
+					null
+				}
 				<div className='padding-md'>
 					{this.props.currentWorld.canWrite ?
 						<a href='#' onClick={() => {this.props.gotoPage('/ui/wiki/edit', {wiki: this.props.currentWiki._id})}}>

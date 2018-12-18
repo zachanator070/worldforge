@@ -21,14 +21,6 @@ class WorldMenu extends Component{
 				<Menu.Item key="1">
 					<a href="#" onClick={() => {this.props.showSelectWorldModal(true)}}>Select World</a>
 				</Menu.Item>
-				{
-					this.props.currentWorld ?
-						<Menu.Item key="2">
-							<a href="#" onClick={() => {this.props.showWorldPermissionModal(true)}}>World Permissions</a>
-						</Menu.Item>
-						: null
-				}
-
 			</Menu>
 		);
 
@@ -39,6 +31,25 @@ class WorldMenu extends Component{
 						{this.props.currentWorld ? this.props.currentWorld.name : 'No World Selected' } <Icon type="down" />
 					</Button>
 				</Dropdown>
+				{ this.props.currentWorld && this.props.currentWorld.canWrite ?
+					<span className='margin-md-left'>
+						<Dropdown
+							overlay={
+								<Menu>
+									<Menu.Item key="2">
+										<a href="#" onClick={() => {this.props.showWorldPermissionModal(true)}}>World Permissions</a>
+									</Menu.Item>
+								</Menu>
+							}
+							trigger={['click']}
+						>
+							<Icon type="setting" className='pointer'/>
+						</Dropdown>
+					</span>
+
+					:
+					null
+				}
 			</div>
 		);
 	}

@@ -13,10 +13,6 @@ body {
 	display: block;
 }
 
-#editor{
-	border: none;
-}
-
 .width-65{
 	width: 65%
 }
@@ -252,4 +248,12 @@ div.ant-upload-list-item{
 
 .folderItem{
 	display: flex;
+}
+
+.pointer{
+	cursor: pointer;
+}
+
+#viewer{
+	border: none;
 }
