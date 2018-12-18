@@ -1,9 +1,6 @@
 
-
-config:
+dev:
 	touch .env
-
-dev: config
 	docker-compose up -d dev && docker-compose logs -f
 
 down:
@@ -25,7 +22,7 @@ build:
 prod:
 	docker-compose up prod mongodb-prod redis-prod
 
-install: config build
+install: build
 	mkdir /srv/worldforge
 	cp -r . /srv/worldforge
 	cp ./example.env /srv/worldforge/.env
