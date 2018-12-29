@@ -18,7 +18,14 @@ module.exports = {
 		filename: 'bundle.js',
 		filename: '[name].bundle.js',
 		path: path.resolve(__dirname, 'dist'),
-		publicPath: '/ui'
+		publicPath: '/'
+	},
+	resolve: {
+		alias: {
+			'parchment': path.resolve(__dirname, 'node_modules/parchment/src/parchment.ts'),
+			'quill$': path.resolve(__dirname, 'node_modules/quill/quill.js'),
+		},
+		extensions: ['.js', '.ts', '.svg']
 	},
 	module: {
 		rules: [
@@ -44,6 +51,29 @@ module.exports = {
 				}
 			},
 			{
+				test: /\.ts$/,
+				use: [{
+					loader: 'ts-loader',
+					options: {
+						compilerOptions: {
+							declaration: false,
+							target: 'es5',
+							module: 'commonjs'
+						},
+						transpileOnly: true
+					}
+				}]
+			},
+			{
+				test: /\.svg$/,
+				use: [{
+					loader: 'html-loader',
+					options: {
+						minimize: true
+					}
+				}]
+			},
+			{
 				test: /\.css$/,
 				use: [
 					'style-loader',
@@ -51,7 +81,7 @@ module.exports = {
 				]
 			},
 			{
-				test: /\.(png|svg|jpg|gif)$/,
+				test: /\.(png|jpg|gif)$/,
 				use: [
 					'file-loader'
 				]

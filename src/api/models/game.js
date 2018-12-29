@@ -48,10 +48,20 @@ const gameSchema = Schema({
 		}
 	})],
 	paths: [Schema({
-		path: [[Number, Number]],
-		color: String,
+		x: Number,
+		y: Number,
+		color: Schema({
+			r: Number,
+			g: Number,
+			b: Number,
+			a: Number
+		}),
 		size: Number,
-		filled: Boolean
+		filled: Boolean,
+		type: {
+			type: String,
+			enum: ['circle', 'square', 'erase']
+		}
 	})],
 	messages:[Schema({
 		sender:{

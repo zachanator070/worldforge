@@ -187,7 +187,7 @@ class FolderView extends Component {
 		}
 
 		return (
-			<div key={folder._id} style={{fontSize: '17px'}}>
+			<div key={folder._id}>
 				{folderItem}
 				{children}
 				{pages}
@@ -206,7 +206,7 @@ class FolderView extends Component {
 			pages.push(this.renderPage(page, 0))
 		}
 		return (
-			<div className='margin-md'>
+			<div className='margin-md' style={{fontSize: '17px'}}>
 				{toRender}
 				{pages}
 			</div>

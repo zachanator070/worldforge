@@ -202,7 +202,19 @@ class RootReducer {
 		game: null,
 		x: 0,
 		y: 0,
-		zoom: 1
+		zoom: 1,
+		brushOptions: {
+			color: {
+				r: 0,
+				g: 0,
+				b: 0,
+				a: 1
+			},
+			on: GameActionFactory.BRUSH_OFF,
+			type: GameActionFactory.BRUSH_CIRCLE,
+			size: 10,
+			filled: true
+		}
 	}, action){
 		switch(action.type){
 			case GameActionFactory.SET_GAME:
@@ -218,6 +230,11 @@ class RootReducer {
 				return Object.assign({}, state, {
 					zoom: action.zoom
 				});
+			case GameActionFactory.SET_BRUSH_OPTIONS:
+				const newState = Object.assign({}, state);
+				const options = Object.assign(newState.brushOptions, action.options);
+				newState.brushOptions = options;
+				return newState;
 			default:
 				return state;
 		}

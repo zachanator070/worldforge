@@ -1,11 +1,11 @@
 import React, {Component} from 'react';
 import {Button, Icon, Input, Select, Upload, Modal} from "antd";
+import Editor from "./editor";
 
 class WikiEdit extends Component{
 
 	constructor(props){
 		super(props);
-		this.editor = null;
 		this.state = {
 			mapToUpload: false,
 			coverToUpload: false,
@@ -63,21 +63,7 @@ class WikiEdit extends Component{
 		if(!this.props.currentWiki){
 			return;
 		}
-		const options = {
-			theme: 'snow',
-			modules: {
-				toolbar: [
-					[{ header: [1, 2, false] }],
-					['bold', 'italic', 'underline'],
-					['image', 'code-block']
-				]
-			},
-			placeholder: 'Compose an epic...',
-		};
-		this.editor = new Quill('#editor', options);
-		if(this.props.currentWiki.content){
-			this.editor.setContents(this.props.currentWiki.content);
-		}
+
 		this.loadCoverImageList();
 		this.loadMapImageList();
 	}
@@ -88,7 +74,7 @@ class WikiEdit extends Component{
 			this.state.type,
 			this.state.coverToUpload,
 			this.state.mapToUpload,
-			this.editor.getContents()
+			this.refs.editor.editor.getContents()
 		);
 	};
 
@@ -188,7 +174,14 @@ class WikiEdit extends Component{
 				}
 
 				<div className='margin-lg'>
-					<div id="editor"></div>
+					<Editor
+						content={this.props.currentWiki.content}
+						currentWorld={this.props.currentWorld}
+						currentMap={this.props.currentMap}
+						currentWiki={this.props.currentWiki}
+						searchWikis={this.props.searchWikis}
+						ref="editor"
+					/>
 				</div>
 
 				<div>

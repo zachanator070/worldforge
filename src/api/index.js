@@ -41,10 +41,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(fileUpload());
 
-app.get('/', (req, res) => {
-	res.redirect('/ui');
-});
-
 const AuthRouter = require("./routes/api/authrouter");
 const UiRouter = require("./routes/ui/uirouter");
 const UsersRouter = require("./routes/api/usersrouter");
@@ -55,7 +51,6 @@ const ChunkRouter = require('./routes/api/chunkrouter');
 const WikiFolderRouter = require('./routes/api/wikifolderrouter');
 const PinRouter = require('./routes/api/pinrouter');
 
-app.use("/ui", UiRouter);
 app.use('/api/auth', AuthRouter);
 app.use('/api/users', UsersRouter);
 app.use('/api/worlds', WorldRouter);
@@ -64,5 +59,7 @@ app.use('/api/images', ImageRouter);
 app.use('/api/chunks', ChunkRouter);
 app.use('/api/wikiFolders', WikiFolderRouter);
 app.use('/api/pins', PinRouter);
+
+app.use("/", UiRouter);
 
 server.listen(port, () => console.log(`listening on port ${port}`));

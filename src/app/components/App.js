@@ -3,6 +3,9 @@ import connect from "react-redux/es/connect/connect";
 
 import '../css/index.css';
 import "antd/dist/antd.css";
+import "quill/dist/quill.core.css";
+import "quill/dist/quill.snow.css";
+import "quill/dist/quill.bubble.css";
 
 import NavbarContainer from "./nav/navbarcontainer";
 import {Router, Route, Switch, withRouter} from "react-router-dom";

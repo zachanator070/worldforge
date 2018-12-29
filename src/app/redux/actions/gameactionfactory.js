@@ -2,6 +2,14 @@ import UIActionFactory from "./uiactionfactory";
 
 class GameActionFactory {
 
+	static BRUSH_ON = "BRUSH_ON";
+	static BRUSH_OFF = "BRUSH_OFF";
+	static BRUSH_BOX = "BRUSH_BOX";
+	static BRUSH_ERASER = "BRUSH_ERASER";
+	static BRUSH_CIRCLE = "BRUSH_CIRCLE";
+
+	static SET_BRUSH_OPTIONS = "SET_BRUSH_OPTIONS";
+
 	static SET_GAME = 'SET_GAME';
 	static SET_GAME_MAP_POSITION = 'SET_GAME_MAP_POSITION';
 	static SET_GAME_MAP_ZOOM = 'SET_GAME_MAP_ZOOM';
@@ -95,6 +103,13 @@ class GameActionFactory {
 				}
 			});
 		}
+	}
+
+	static setBrushOptions(options) {
+		return {
+			type: GameActionFactory.SET_BRUSH_OPTIONS,
+			options: options
+		};
 	}
 }
 

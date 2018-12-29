@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import {Dropdown, Icon, Menu, Popover} from "antd";
+import MapDrawingCanvas from "./mapdrawingcanvas";
 
-class MapCanvas extends Component {
+class Map extends Component {
 
 	constructor(props){
 		super(props);
@@ -10,7 +11,8 @@ class MapCanvas extends Component {
 			lastMouseY: null,
 			width: 0,
 			height: 0,
-			defaultCalculated: true
+			defaultCalculated: true,
+			listenersAdded: true,
 		};
 	}
 
@@ -32,27 +34,34 @@ class MapCanvas extends Component {
 		});
 	};
 
-	componentDidMount(){
-		const canvas = this.refs.canvas;
-		canvas.addEventListener('mousedown', (mousedownEvent) => {
-			if(mousedownEvent.button !== 0){
-				return;
-			}
-			this.setState({
-				lastMouseX: mousedownEvent.clientX,
-				lastMouseY: mousedownEvent.clientY
-			});
-			canvas.addEventListener('mousemove', this.updateMapPosition, false);
-		}, false);
-		canvas.addEventListener('mouseup', (mouseUpEvent) => {
-			canvas.removeEventListener('mousemove', this.updateMapPosition);
-		}, false);
+	setupMouseListener = () => {
+		if(this.refs.canvas && !this.state.listenersAdded){
+			const canvas = this.refs.canvas;
+			canvas.addEventListener('mousedown', (mousedownEvent) => {
+				if(mousedownEvent.button !== 0){
+					return;
+				}
+				this.setState({
+					lastMouseX: mousedownEvent.clientX,
+					lastMouseY: mousedownEvent.clientY
+				});
+				canvas.addEventListener('mousemove', this.updateMapPosition, false);
+			}, false);
+			canvas.addEventListener('mouseup', (mouseUpEvent) => {
+				canvas.removeEventListener('mousemove', this.updateMapPosition);
+			}, false);
+			this.setState({listenersAdded: true});
+		}
+	}
 
+	componentDidMount(){
+		this.setupMouseListener();
 		this.updateWindowDimensions();
 	}
 
 	componentDidUpdate(prevProps, prevState, snapshot) {
 		this.updateWindowDimensions();
+		this.setupMouseListener();
 		if(this.props.currentMap.zoom === 0 || prevProps.currentMap.image._id !== this.props.currentMap.image._id){
 			this.setState({
 				defaultCalculated: false
@@ -187,7 +196,8 @@ class MapCanvas extends Component {
 			);
 		}
 
-		images = images.concat(extras);
+		const canvasCoords = this.translate(0,0);
+		const bottomCoords = this.translate(this.props.currentMap.image.width, this.props.currentMap.image.height);
 
 		let canvas =
 			<div ref='container' className='flex-grow-1 flex-column'>
@@ -196,6 +206,14 @@ class MapCanvas extends Component {
 					className='margin-none overflow-hidden flex-grow-1 position-relative'
 					onWheel={this.handleWheelEvent}
 				>
+					{extras}
+					<MapDrawingCanvas
+						left={canvasCoords[0]}
+						top={canvasCoords[1]}
+						width={bottomCoords[0] - canvasCoords[0]}
+						height={bottomCoords[1] - canvasCoords[1]}
+						brushOptions={this.props.currentGame ? this.props.currentGame.brushOptions : null}
+					/>
 					{images}
 				</div>
 			</div>;
@@ -225,4 +243,4 @@ class MapCanvas extends Component {
 
 }
 
-export default MapCanvas;
+export default Map;

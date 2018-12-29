@@ -1,12 +1,12 @@
 import React, {Component} from 'react';
 import {Icon} from "antd";
 import ScaledImage from "./scaledimage";
+import Editor from "./editor";
 
 class WikiView extends Component{
 
 	constructor(props){
 		super(props);
-		this.editor = null;
 		this.state = {
 			width: 0,
 			height: 0
@@ -14,7 +14,6 @@ class WikiView extends Component{
 	}
 
 	componentDidMount(){
-		this.initQuill();
 		if(this.props.currentWiki){
 			this.setState({
 				width: this.refs.wikiView.offsetWidth,
@@ -24,7 +23,6 @@ class WikiView extends Component{
 	}
 
 	componentDidUpdate(){
-		this.initQuill();
 		if(this.props.currentWiki && (this.refs.wikiView.offsetWidth !== this.state.width || this.refs.wikiView.offsetHeight !== this.state.height)){
 			this.setState({
 				width: this.refs.wikiView.offsetWidth,
@@ -32,23 +30,6 @@ class WikiView extends Component{
 			});
 		}
 	}
-
-	initQuill = () => {
-		if(!this.props.currentWiki){
-			return;
-		}
-		const options = {
-			readOnly: true,
-			theme: 'snow',
-			"modules": {
-				"toolbar": false
-			}
-		};
-		if(this.props.currentWiki.content){
-			this.editor = new Quill('#viewer', options);
-			this.editor.setContents(this.props.currentWiki.content);
-		}
-	};
 
 	getPinFromPageId = (pageId) => {
 		for(let pin of this.props.allPins){
@@ -99,7 +80,14 @@ class WikiView extends Component{
 				{mapIcon}
 				{this.props.currentWiki.content ?
 					<div className='padding-md'>
-						<div id='viewer'></div>
+						<Editor
+							content={this.props.currentWiki.content}
+							currentWorld={this.props.currentWorld}
+							currentMap={this.props.currentMap}
+							searchWikis={this.props.searchWikis}
+							ref="editor"
+							readOnly={true}
+						/>
 					</div>
 					:
 					null

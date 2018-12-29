@@ -162,14 +162,19 @@ class WikiActionFactory{
 		}
 	}
 
-	static searchWikis(params){
+	static searchWikis(params, cb){
 		return async (dispatch, getState, {apiClient, history}) => {
 			try{
 				const results = await apiClient.searchWikis(params);
-				dispatch({
-					type: WikiActionFactory.SET_WIKI_SEARCH_RESULTS,
-					results: results
-				});
+				if(cb){
+					cb(results);
+				}
+				else{
+					dispatch({
+						type: WikiActionFactory.SET_WIKI_SEARCH_RESULTS,
+						results: results
+					});
+				}
 			} catch(e){
 				UIActionFactory.showError(e);
 			}

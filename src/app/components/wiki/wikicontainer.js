@@ -36,8 +36,31 @@ class Wiki extends Component{
 				<Col span={16}>
 					<Router history={this.props.history}>
 						<Switch>
-							<Route path='/ui/wiki/edit' render={() => {return (<WikiEdit gotoPage={this.props.gotoPage} currentWiki={this.props.currentWiki} saveWiki={this.props.saveWiki} deleteWikiPage={this.props.deleteWikiPage}/>);}}/>
-							<Route path='/ui/wiki/view' render={() => {return (<WikiView gotoPage={this.props.gotoPage} currentWiki={this.props.currentWiki} currentWorld={this.props.currentWorld} allPins={this.props.allPins}/>);}}/>
+							<Route path='/ui/wiki/edit' render={() => {
+								return (
+									<WikiEdit
+										gotoPage={this.props.gotoPage}
+										currentWiki={this.props.currentWiki}
+										saveWiki={this.props.saveWiki}
+										deleteWikiPage={this.props.deleteWikiPage}
+										currentWorld={this.props.currentWorld}
+										currentMap={this.props.currentMap}
+										searchWikis={this.props.searchWikis}
+									/>
+								);
+							}}/>
+							<Route path='/ui/wiki/view' render={() => {
+								return (
+									<WikiView
+										gotoPage={this.props.gotoPage}
+										currentWiki={this.props.currentWiki}
+										currentWorld={this.props.currentWorld}
+										allPins={this.props.allPins}
+										currentMap={this.props.currentMap}
+										searchWikis={this.props.searchWikis}
+									/>
+								);
+							}}/>
 						</Switch>
 					</Router>
 				</Col>
@@ -79,6 +102,9 @@ const mapDispatchToProps = dispatch => {
 		deleteWikiPage: (page) => {
 			dispatch(WikiActionFactory.deleteWikiPage(page));
 		},
+		searchWikis: (params, cb) => {
+			dispatch(WikiActionFactory.searchWikis(params, cb));
+		}
 	}
 };
 

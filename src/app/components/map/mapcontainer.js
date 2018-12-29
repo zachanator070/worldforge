@@ -4,7 +4,7 @@ import {connect} from 'react-redux';
 import DefaultViewContainer from "../defaultviewcontainer";
 import {Button, Divider, Drawer, Icon, Popover, Row, Upload} from "antd";
 import WikiActionFactory from "../../redux/actions/wikiactionfactory";
-import MapCanvas from "./mapcanvas";
+import Map from "./map";
 import MapActionFactory from "../../redux/actions/mapactionfactory";
 import WikiView from "../wiki/wikiview";
 import UIActionFactory from "../../redux/actions/uiactionfactory";
@@ -12,7 +12,7 @@ import DefaultMapView from "./defaultmapview";
 import SlidingDrawer from "../slidingdrawer";
 import MapBreadCrumbs from "./mapbreadcrumbs";
 
-class Map extends Component {
+class MapView extends Component {
 
 	constructor(props){
 		super(props);
@@ -107,7 +107,7 @@ class Map extends Component {
 		}
 		const pins = this.getPins();
 
-		let canvas = <MapCanvas
+		let canvas = <Map
 			setCurrentMapPosition={this.props.setCurrentMapPosition}
 			setCurrentMapZoom={this.props.setCurrentMapZoom}
 			currentMap={this.props.currentMap}
@@ -222,6 +222,6 @@ const mapDispatchToProps = dispatch => {
  const MapContainer = connect(
 	mapStateToProps,
 	mapDispatchToProps
- )(withRouter(Map));
+ )(withRouter(MapView));
 
 export default MapContainer;

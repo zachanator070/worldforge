@@ -2,15 +2,18 @@ import React, {Component} from 'react';
 import connect from "react-redux/es/connect/connect";
 
 import UIActionFactory from "../../redux/actions/uiactionfactory";
-import {Button, Col, Form, Icon, Input, Row, Tabs} from "antd";
+import {Button, Col, Form, Icon, Input, Row, Tabs, Radio} from "antd";
 import GameActionFactory from "../../redux/actions/gameactionfactory";
 import DefaultGameView from "./defaultgameview";
 import SlidingDrawer from "../slidingdrawer";
 import GameMessenger from "./gamemessenger";
 import WikiView from "../wiki/wikiview";
 import SelectPlace from "../selectplace";
-import MapCanvas from "../map/mapcanvas";
+import Map from "../map/map";
 
+import { MdBrush } from "react-icons/md";
+import { FiMove, FiSquare, FiCircle } from "react-icons/fi";
+import BrushOptions from "./brushoptions";
 
 class GameView extends Component{
 
@@ -20,7 +23,7 @@ class GameView extends Component{
 		this.state = {
 			width: 0,
 			height: 0,
-			selectedPlace: null
+			selectedPlace: null,
 		};
 	}
 
@@ -75,20 +78,23 @@ class GameView extends Component{
 			);
 		}
 
-		let canvas = this.props.currentGame && this.props.currentGame.game && this.props.currentGame.game.mapImage && this.props.currentGame.game.mapImage.chunks ? <MapCanvas
-			setCurrentMapPosition={this.props.setGameMapPosition}
-			setCurrentMapZoom={this.props.setGameMapZoom}
-			currentMap={{
-				x: this.props.currentGame.x,
-				y: this.props.currentGame.y,
-				zoom: this.props.currentGame.zoom,
-				image: this.props.currentGame.game.mapImage,
-			}}
-			currentWorld={this.props.currentWorld}
-			getAndSetMap={() => {
+		let canvas = this.props.currentGame && this.props.currentGame.game && this.props.currentGame.game.mapImage && this.props.currentGame.game.mapImage.chunks ?
+			<Map
+				setCurrentMapPosition={this.props.setGameMapPosition}
+				setCurrentMapZoom={this.props.setGameMapZoom}
+				currentGame={this.props.currentGame}
+				currentMap={{
+					x: this.props.currentGame.x,
+					y: this.props.currentGame.y,
+					zoom: this.props.currentGame.zoom,
+					image: this.props.currentGame.game.mapImage,
+				}}
+				currentWorld={this.props.currentWorld}
+				getAndSetMap={() => {
 
-			}}
-		/> :
+				}}
+			/>
+			:
 			<div className='text-align-center'><h2>No Map Selected</h2></div>;
 
 		return (
@@ -124,6 +130,12 @@ class GameView extends Component{
 						</span>
 						<Button type='danger' onClick={() => {this.props.leaveGame();}}>Leave</Button>
 					</div>
+					<div className="margin-md">
+						<Radio.Group  defaultValue={this.props.currentGame.brushOptions.on} onChange={(e) => {this.props.setBrushOptions({on: e.target.value})}}>
+							<Radio.Button value={GameActionFactory.BRUSH_OFF}><FiMove/></Radio.Button>
+							<Radio.Button value={GameActionFactory.BRUSH_ON}><MdBrush/></Radio.Button>
+						</Radio.Group>
+					</div>
 					<Tabs defaultActiveKey="1">
 						<Tabs.TabPane tab={<span><Icon type="message" />Messages</span>} key="1">
 							<GameMessenger
@@ -143,6 +155,12 @@ class GameView extends Component{
 								disabled={!this.state.selectedPlace}
 								onClick={() => {this.props.setMap(this.state.selectedPlace.mapImage._id);}}
 							>Change Map</Button>
+						</Tabs.TabPane>
+						<Tabs.TabPane tab={<span><MdBrush className={"margin-md-right"}/>Brush</span>} key="3">
+							<BrushOptions
+								currentGame={this.props.currentGame}
+								setBrushOptions={this.props.setBrushOptions}
+							/>
 						</Tabs.TabPane>
 					</Tabs>
 				</SlidingDrawer>
@@ -198,6 +216,9 @@ const mapDispatchToProps = dispatch => {
 		},
 		setGameMapZoom: (zoom) => {
 			dispatch(GameActionFactory.setGameMapZoom(zoom));
+		},
+		setBrushOptions: (options) => {
+			dispatch(GameActionFactory.setBrushOptions(options));
 		}
 	}
 };
