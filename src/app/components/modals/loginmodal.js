@@ -52,6 +52,9 @@ class LoginModal extends Component {
 									prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />}
 									value={this.state.email}
 									onChange={this.updateEmail}
+									name="loginEmail"
+									id="loginEmail"
+									autoComplete="loginEmail"
 								/>
 						</Form.Item>
 						<Form.Item
@@ -63,7 +66,11 @@ class LoginModal extends Component {
 								prefix={<Icon type="key" style={{ color: 'rgba(0,0,0,.25)' }} />}
 								value={this.state.password}
 								onChange={this.updatePassword}
-								type='password'/>
+								type='password'
+								name='loginPassword'
+								id='loginPassword'
+								autoComplete='loginPassword'
+							/>
 						</Form.Item>
 						<Form.Item
 							{...noLabelItem}>

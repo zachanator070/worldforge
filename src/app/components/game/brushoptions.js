@@ -3,7 +3,7 @@ import {ChromePicker} from 'react-color';
 import GameActionFactory from "../../redux/actions/gameactionfactory";
 import {FiCircle, FiSquare} from "react-icons/fi";
 import {FaEraser} from "react-icons/fa";
-import {Radio, Slider} from 'antd';
+import {Radio, Slider, Switch} from 'antd';
 
 class BrushOptions extends Component {
 	render(){
@@ -23,6 +23,9 @@ class BrushOptions extends Component {
 					onChange={(value) => {this.props.setBrushOptions({size: value})}}
 					value={this.props.currentGame.brushOptions.size}
 				/>
+				<div className='margin-lg'>
+					<label className='margin-md-right'>Filled</label><Switch defaultChecked onChange={(checked) => {this.props.setBrushOptions({filled: checked})}} />
+				</div>
 				<ChromePicker
 					className="margin-lg"
 					color={this.props.currentGame.brushOptions.color}

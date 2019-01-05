@@ -99,7 +99,7 @@ class DefaultGameView extends Component{
 						<Form
 							layout='horizontal'
 							onSubmit={() => {return false;}}
-							autoComplete="off"
+							autoComplete="joinGame"
 						>
 							<Form.Item {...noLabelItem}>
 								<h2>Join game</h2>
@@ -113,6 +113,8 @@ class DefaultGameView extends Component{
 									value={this.state.gameId}
 									onChange={this.updateGameId}
 									name='gameId'
+									id='gameId'
+									autoComplete="gameId"
 								/>
 							</Form.Item>
 							<Form.Item
@@ -126,6 +128,8 @@ class DefaultGameView extends Component{
 									onChange={this.updatePassword}
 									type='password'
 									name='joinGamePassword'
+									id='joinGamePassword'
+									autoComplete='joinGamePassword'
 								/>
 							</Form.Item>
 							<Form.Item

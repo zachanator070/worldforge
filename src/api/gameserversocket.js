@@ -38,6 +38,9 @@ class GameServerSocket {
 
 	setup(){
 		this.io.on('connection', (socket) => {
+
+			console.log(`${socket.id} connected`);
+
 			socket.on('CREATE_GAME', (game, callback) => {
 				let password = game.password;
 				if(game.password){
@@ -192,7 +195,12 @@ class GameServerSocket {
 				});
 			});
 
+			socket.on('reconnect', () => {
+				console.log(`${socket.id} reconnected`);
+			});
+
 			socket.on('disconnect', () => {
+				console.log(`${socket.id} disconnected`);
 				Game.findOne({'players.socketId': socket.id}, (error, game) => {
 					if(game){
 						this.populateGame(game, (error, newGame) => {

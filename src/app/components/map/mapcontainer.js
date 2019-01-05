@@ -11,6 +11,8 @@ import UIActionFactory from "../../redux/actions/uiactionfactory";
 import DefaultMapView from "./defaultmapview";
 import SlidingDrawer from "../slidingdrawer";
 import MapBreadCrumbs from "./mapbreadcrumbs";
+import Pin from "./pin";
+import MouseCoordinates from "../mousecoordinates";
 
 class MapView extends Component {
 
@@ -44,58 +46,18 @@ class MapView extends Component {
 	getPins = () => {
 		let pins =  [];
 		for (let pin of this.props.allPins.filter((pin) => {return pin.map._id === this.props.currentMap.image._id})){
-
-			const editButton = this.props.currentWorld && this.props.currentWorld.canWrite ?
-				<a href='#' className='margin-md-left' onClick={() => {
-					this.props.setPinBeingEdited(pin);
-					this.props.showEditPinModal(true);
-				}}>Edit Pin</a>
-				: null;
-
-			let pinPopupContent = <div>
-				<h2>Empty Pin</h2>
-				{editButton}
-			</div>;
-
-			if(pin.page){
-				pinPopupContent = <div>
-					<h2>{pin.page.name}</h2>
-					<h3>{pin.page.type}</h3>
-					<a href='#' onClick={() => {
-						this.props.findAndSetDisplayWiki(pin.page._id);
-						this.props.showLeftDrawer(true);
-					}}>Details</a>
-					{pin.page.type === 'place' && pin.page.mapImage ? <a className='margin-md-left' href='#' onClick={() => {this.props.gotoPage('/ui/map', {map: pin.page.mapImage._id})}}>Open Map</a> : null }
-					{editButton}
-				</div>;
-			}
-
-			pins.push({
-				x: pin.x,
-				y: pin.y,
-				render: (x, y) => {
-					return (
-						<Popover
-							content={pinPopupContent}
-							trigger="click"
-							key={pin._id}
-							overlayStyle={{zIndex: '3'}}
-						>
-							<div style={{
-								position: 'absolute',
-								left: x - 5,
-								top: y - 5,
-								zIndex: 1,
-								borderRadius: "50%",
-								width: "15px",
-								height: "15px",
-								backgroundColor: "crimson",
-								border: "3px solid powderblue"
-							}}/>
-						</Popover>
-					);
-				}
-			});
+			pins.push(
+				<Pin
+					currentWorld={this.props.currentWorld}
+					setPinBeingEdited={this.props.setPinBeingEdited}
+					showEditPinModal={this.props.showEditPinModal}
+					pin={pin}
+					findAndSetDisplayWiki={this.props.findAndSetDisplayWiki}
+					showLeftDrawer={this.props.showLeftDrawer}
+					gotoPage={this.props.gotoPage}
+					key={pin._id}
+				/>
+			);
 		}
 
 		return pins;
@@ -107,30 +69,30 @@ class MapView extends Component {
 		}
 		const pins = this.getPins();
 
-		let canvas = <Map
-			setCurrentMapPosition={this.props.setCurrentMapPosition}
-			setCurrentMapZoom={this.props.setCurrentMapZoom}
-			currentMap={this.props.currentMap}
-			currentWorld={this.props.currentWorld}
-			menuItems={[
-				{
-					onClick: (mouseX, mouseY) => {
-						let pin = {
-							x: mouseX,
-							y: mouseY,
-							map: this.props.currentMap.image._id
-						};
-						this.props.createPin(pin);
-					},
-					name: 'New Pin'
-				}
-			]}
-			extras={pins}
-			getAndSetMap={this.props.getAndSetMap}
-		/>;
+		let map = <Map
+				setCurrentMapPosition={this.props.setCurrentMapPosition}
+				setCurrentMapZoom={this.props.setCurrentMapZoom}
+				currentMap={this.props.currentMap}
+				currentWorld={this.props.currentWorld}
+				menuItems={[
+					{
+						onClick: (mouseX, mouseY) => {
+							let pin = {
+								x: mouseX,
+								y: mouseY,
+								map: this.props.currentMap.image._id
+							};
+							this.props.createPin(pin);
+						},
+						name: 'New Pin'
+					}
+				]}
+				extras={pins}
+				getAndSetMap={this.props.getAndSetMap}
+			/>;
 
 		if(!this.props.currentMap.image){
-			canvas = <DefaultMapView
+			map = <DefaultMapView
 				uploadImageFromMap={this.props.uploadImageFromMap}
 				ui={this.props.ui}
 				setMapUploadStatus={this.props.setMapUploadStatus}
@@ -163,7 +125,7 @@ class MapView extends Component {
 							/>
 						</SlidingDrawer>
 						: null}
-					{canvas}
+					{map}
 				</div>
 			</div>
 		);

@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {Dropdown, Icon, Menu, Popover} from "antd";
 import MapDrawingCanvas from "./mapdrawingcanvas";
+import GameActionFactory from "../../redux/actions/gameactionfactory";
 
 class Map extends Component {
 
@@ -12,13 +13,13 @@ class Map extends Component {
 			width: 0,
 			height: 0,
 			defaultCalculated: true,
-			listenersAdded: true,
+			listenersAdded: false,
 		};
 	}
 
 	updateWindowDimensions = () => {
-		if(this.refs.container && (this.refs.container.offsetWidth !== this.state.width || this.refs.container.offsetHeight !== this.state.height)){
-			this.setState({ width: this.refs.container.offsetWidth, height: this.refs.container.offsetHeight, defaultCalculated: false});
+		if(this.refs.mapContainer && (this.refs.mapContainer.offsetWidth !== this.state.width || this.refs.mapContainer.offsetHeight !== this.state.height)){
+			this.setState({ width: this.refs.mapContainer.offsetWidth, height: this.refs.mapContainer.offsetHeight, defaultCalculated: false});
 		}
 	};
 
@@ -34,34 +35,48 @@ class Map extends Component {
 		});
 	};
 
-	setupMouseListener = () => {
-		if(this.refs.canvas && !this.state.listenersAdded){
-			const canvas = this.refs.canvas;
-			canvas.addEventListener('mousedown', (mousedownEvent) => {
-				if(mousedownEvent.button !== 0){
-					return;
-				}
-				this.setState({
-					lastMouseX: mousedownEvent.clientX,
-					lastMouseY: mousedownEvent.clientY
-				});
-				canvas.addEventListener('mousemove', this.updateMapPosition, false);
-			}, false);
-			canvas.addEventListener('mouseup', (mouseUpEvent) => {
-				canvas.removeEventListener('mousemove', this.updateMapPosition);
-			}, false);
+	startMapUpdate = (mousedownEvent) => {
+		if(mousedownEvent.button !== 0){
+			return;
+		}
+		this.refs.map.addEventListener('mousemove', this.updateMapPosition, false);
+	};
+
+	stopMapUpdate = (mouseUpEvent) => {
+		this.refs.map.removeEventListener('mousemove', this.updateMapPosition);
+	};
+
+	addMapPanListener = () => {
+		const map = this.refs.map;
+		if(map){
+			map.addEventListener('mousedown', this.startMapUpdate, false);
+			map.addEventListener('mouseup', this.stopMapUpdate, false);
 			this.setState({listenersAdded: true});
 		}
-	}
+	};
+
+	removeMapPanListener = () => {
+		const map = this.refs.map;
+		if(map){
+			map.removeEventListener('mousedown', this.startMapUpdate, false);
+			map.removeEventListener('mouseup', this.stopMapUpdate, false);
+			this.setState({listenersAdded: false});
+		}
+	};
 
 	componentDidMount(){
-		this.setupMouseListener();
 		this.updateWindowDimensions();
 	}
 
 	componentDidUpdate(prevProps, prevState, snapshot) {
 		this.updateWindowDimensions();
-		this.setupMouseListener();
+		if(!this.props.currentGame || this.props.currentGame.brushOptions.on === GameActionFactory.BRUSH_OFF){
+			if(!this.state.listenersAdded){
+				this.addMapPanListener();
+			}
+		} else if (this.state.listenersAdded){
+			this.removeMapPanListener();
+		}
 		if(this.props.currentMap.zoom === 0 || prevProps.currentMap.image._id !== this.props.currentMap.image._id){
 			this.setState({
 				defaultCalculated: false
@@ -160,10 +175,10 @@ class Map extends Component {
 		for(let item of this.props.menuItems || []){
 			menuItems.push(
 				<Menu.Item key={item.name} onClick={() => {
-					const boundingBox = this.refs.canvas.getBoundingClientRect();
-					const mouseX = this.state.lastMouseX - boundingBox.x;
-					const mouseY = this.state.lastMouseY - boundingBox.y;
-					const coords = this.reverseTranslate(mouseX, mouseY);
+					const boundingBox = this.refs.map.getBoundingClientRect();
+					const x = this.state.lastMouseX - boundingBox.x;
+					const y = this.state.lastMouseY - boundingBox.y;
+					const coords = this.reverseTranslate(x, y);
 					item.onClick(coords[0], coords[1]);
 				}}>{item.name}</Menu.Item>
 			);
@@ -190,40 +205,26 @@ class Map extends Component {
 		const extras = [];
 
 		for(let extra of this.props.extras || []){
-			const coords = this.translate(extra.x, extra.y);
 			extras.push(
-				extra.render(coords[0], coords[1])
+				React.cloneElement(extra, {translate: this.translate})
 			);
 		}
 
-		const canvasCoords = this.translate(0,0);
-		const bottomCoords = this.translate(this.props.currentMap.image.width, this.props.currentMap.image.height);
-
-		let canvas =
-			<div ref='container' className='flex-grow-1 flex-column'>
-				<div
-					ref='canvas'
-					className='margin-none overflow-hidden flex-grow-1 position-relative'
-					onWheel={this.handleWheelEvent}
-				>
-					{extras}
-					<MapDrawingCanvas
-						left={canvasCoords[0]}
-						top={canvasCoords[1]}
-						width={bottomCoords[0] - canvasCoords[0]}
-						height={bottomCoords[1] - canvasCoords[1]}
-						brushOptions={this.props.currentGame ? this.props.currentGame.brushOptions : null}
-					/>
-					{images}
-				</div>
-			</div>;
-
-		if(this.props.currentWorld.canWrite){
-
-			const menuItems = this.getDropdownMenu();
-
-			if(menuItems.length > 0){
-				canvas = <div ref='container' className='flex-grow-1 flex-column'>
+		const map = <div
+			ref='map'
+			className='margin-none overflow-hidden flex-grow-1 position-relative flex-column'
+			onWheel={this.handleWheelEvent}
+			onMouseDown={(event) => {
+				this.setState({lastMouseX: event.clientX, lastMouseY: event.clientY})
+			}}
+		>
+			{images}
+			{extras}
+		</div>;
+		const menuItems = this.getDropdownMenu();
+		const mapContainer =
+			<div ref='mapContainer' className='flex-grow-1 flex-column'>
+				{this.props.currentWorld.canWrite && menuItems.length > 0 ?
 					<Dropdown
 						overlay={
 							<Menu>
@@ -232,13 +233,14 @@ class Map extends Component {
 						}
 						trigger={['contextMenu']}
 					>
-						{canvas}
+						{map}
 					</Dropdown>
-				</div>
+					:
+					map
+				}
+			</div>;
 
-			}
-		}
-		return canvas;
+		return mapContainer;
 	}
 
 }

@@ -12,6 +12,10 @@ class GameClientSocket {
 			this.store.dispatch(GameActionFactory.setGame(game));
 		});
 
+		this.socket.on('connect', () => {
+			console.log(`socket ${this.socket.id} connected`);
+		});
+
 	}
 }
 

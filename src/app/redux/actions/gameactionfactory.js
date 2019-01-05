@@ -57,6 +57,16 @@ class GameActionFactory {
 		}
 	}
 
+	static paint(x, y, brushOptions){
+		return async (dispatch, getState, { apiClient, history, socket}) => {
+			socket.emit('PAINT', {x: x, y:y, brushOptions: brushOptions}, (error, game) => {
+				if(!error){
+					dispatch(GameActionFactory.setGame(game));
+				}
+			});
+		};
+	}
+
 	static setGame(game){
 		return {
 			type: GameActionFactory.SET_GAME,

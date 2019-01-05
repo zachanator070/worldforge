@@ -111,7 +111,7 @@ body {
 
 .nav-bar{
 	background-color: white;
-	z-index: 3;
+	z-index: 10;
 	position: relative;
 	width: 100%;
 }
@@ -175,7 +175,7 @@ div.ant-upload-list-item{
 
 .drawer{
 	display: inline;
-	z-index: 2;
+	z-index: 9;
 }
 
 .drawer-content {
@@ -223,7 +223,7 @@ div.ant-upload-list-item{
 
 .breadcrumbs{
 	background-color: white;
-	z-index: 2;
+	z-index: 9;
 	padding: 5px;
 	position: relative;
 	border-bottom: thin solid lightgrey;

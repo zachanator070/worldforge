@@ -14,6 +14,8 @@ import Map from "../map/map";
 import { MdBrush } from "react-icons/md";
 import { FiMove, FiSquare, FiCircle } from "react-icons/fi";
 import BrushOptions from "./brushoptions";
+import MapActionFactory from "../../redux/actions/mapactionfactory";
+import MapDrawingCanvas from "../map/mapdrawingcanvas";
 
 class GameView extends Component{
 
@@ -90,9 +92,13 @@ class GameView extends Component{
 					image: this.props.currentGame.game.mapImage,
 				}}
 				currentWorld={this.props.currentWorld}
-				getAndSetMap={() => {
-
-				}}
+				getAndSetMap={this.props.getAndSetMap}
+				extras={[
+					<MapDrawingCanvas
+						brushOptions={this.props.currentGame ? this.props.currentGame.brushOptions : null}
+						key='mapDrawingCanvas'
+					/>
+				]}
 			/>
 			:
 			<div className='text-align-center'><h2>No Map Selected</h2></div>;
@@ -219,6 +225,9 @@ const mapDispatchToProps = dispatch => {
 		},
 		setBrushOptions: (options) => {
 			dispatch(GameActionFactory.setBrushOptions(options));
+		},
+		getAndSetMap: (mapId) => {
+			dispatch(MapActionFactory.getAndSetMap(mapId));
 		}
 	}
 };

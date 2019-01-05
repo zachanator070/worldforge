@@ -69,6 +69,7 @@ class WikiEdit extends Component{
 	}
 
 	save = () => {
+		this.setState({saving: true});
 		this.props.saveWiki(
 			this.state.name,
 			this.state.type,
@@ -185,8 +186,8 @@ class WikiEdit extends Component{
 				</div>
 
 				<div>
-					<Button type='primary' disabled={this.state.saving} onClick={this.save}>Save</Button>
-					<Button type='danger' disabled={this.state.saving} className='margin-md-left' onClick={() => {this.props.gotoPage('/ui/wiki/view')}}>Discard</Button>
+					<Button type='primary' disabled={this.state.saving} onClick={this.save}><Icon type="save" />Save</Button>
+					<Button type='danger' disabled={this.state.saving} className='margin-md-left' onClick={() => {this.props.gotoPage('/ui/wiki/view')}}><Icon type="undo" />Discard</Button>
 					<span className='absolute-right' >
 						<Button type='danger' disabled={this.state.saving} onClick={() => {
 							Modal.confirm({
@@ -196,7 +197,7 @@ class WikiEdit extends Component{
 									this.props.deleteWikiPage(this.props.currentWiki);
 								}
 							});
-						}}>Delete Page</Button>
+						}}><Icon type="delete" />Delete Page</Button>
 					</span>
 				</div>
 			</div>

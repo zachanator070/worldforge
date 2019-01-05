@@ -59,6 +59,7 @@ class RegisterModal extends Component {
 					centered
 					onCancel={this.props.cancel}
 					footer={null}
+					width={720}
 				>
 					<Form layout='horizontal' onSubmit={() => {this.props.register(this.state.email, this.state.password, this.state.displayName)}}>
 						<Form.Item label="Email" {...formItemLayout}>
@@ -67,6 +68,9 @@ class RegisterModal extends Component {
 								prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />}
 								value={this.state.email}
 								onChange={this.updateEmail}
+								name='registerEmail'
+								id='registerEmail'
+								autoComplete='registerEmail'
 							/>
 						</Form.Item>
 						<Form.Item label="Display Name" {...formItemLayout}>
@@ -75,6 +79,9 @@ class RegisterModal extends Component {
 								prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
 								value={this.state.displayName}
 								onChange={this.updateDisplayName}
+								name='registerDisplayName'
+								id='registerDisplayName'
+								autoComplete='registerDisplayName'
 							/>
 						</Form.Item>
 						<Form.Item label="Password" {...formItemLayout} >
@@ -83,7 +90,11 @@ class RegisterModal extends Component {
 								prefix={<Icon type="key" style={{ color: 'rgba(0,0,0,.25)' }} />}
 								value={this.state.password}
 								onChange={this.updatePassword}
-								type='password'/>
+								type='password'
+								name='registerPassword'
+								id='registerPassword'
+								autoComplete='registerPassword'
+							/>
 						</Form.Item>
 						<Form.Item label="Repeat Password" {...formItemLayout} >
 							<Input
@@ -91,7 +102,11 @@ class RegisterModal extends Component {
 								prefix={<Icon type="key" style={{ color: 'rgba(0,0,0,.25)' }} />}
 								value={this.state.repeatPassword}
 								onChange={this.updateRepeatPassword}
-								type='password'/>
+								type='password'
+								name='registerRepeatPassword'
+								id='registerRepeatPassword'
+								autoComplete='registerRepeatPassword'
+							/>
 						</Form.Item>
 						<Form.Item {...noLabelItem}>
 							<Button type="primary" htmlType="submit">Register</Button>
