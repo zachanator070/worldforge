@@ -5,6 +5,7 @@ class GameActionFactory {
 	static BRUSH_ON = "BRUSH_ON";
 	static BRUSH_OFF = "BRUSH_OFF";
 	static BRUSH_BOX = "BRUSH_BOX";
+	static BRUSH_LINE = "BRUSH_LINE";
 	static BRUSH_ERASER = "BRUSH_ERASER";
 	static BRUSH_CIRCLE = "BRUSH_CIRCLE";
 

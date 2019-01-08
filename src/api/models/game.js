@@ -47,9 +47,11 @@ const gameSchema = Schema({
 			required: [true, 'y position required']
 		}
 	})],
-	paths: [Schema({
-		x: Number,
-		y: Number,
+	strokes: [Schema({
+		path: [Schema({
+			x: Number,
+			y: Number,
+		})],
 		color: Schema({
 			r: Number,
 			g: Number,

@@ -206,7 +206,7 @@ class Map extends Component {
 
 		for(let extra of this.props.extras || []){
 			extras.push(
-				React.cloneElement(extra, {translate: this.translate})
+				React.cloneElement(extra, {translate: this.translate, reverseTranslate: this.reverseTranslate})
 			);
 		}
 

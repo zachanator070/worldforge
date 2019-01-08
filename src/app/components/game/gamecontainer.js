@@ -96,6 +96,13 @@ class GameView extends Component{
 				extras={[
 					<MapDrawingCanvas
 						brushOptions={this.props.currentGame ? this.props.currentGame.brushOptions : null}
+						currentGame={this.props.currentGame}
+						currentMap={{
+							x: this.props.currentGame.x,
+							y: this.props.currentGame.y,
+							zoom: this.props.currentGame.zoom,
+							image: this.props.currentGame.game.mapImage,
+						}}
 						key='mapDrawingCanvas'
 					/>
 				]}

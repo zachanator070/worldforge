@@ -2,6 +2,30 @@
 const Game = require('./models/game');
 const User = require('./models/user');
 
+const systemSender = "World Forge";
+
+const commands = [
+	{
+		regex: /\/roll \d+d\d+/,
+		exec: (sender, message) => {
+			let parts = message.split(' ');
+			if(parts.length === 2){
+				const dicePart = parts[1];
+				parts = parts[1].split('d');
+				if(parts.length === 2){
+					let numDie = parseInt(parts[0]);
+					const die = parseInt(parts[1]);
+					const results = [];
+					for(;numDie > 0; numDie--){
+						results.push(Math.floor(Math.random() * Math.floor(die)) + 1);
+					}
+					return `${sender} rolled ${dicePart} and got ${JSON.stringify(results)} = ${results.reduce((a, b) => a + b, 0)}`;
+				}
+			}
+		}
+	}
+];
+
 class GameServerSocket {
 	constructor(io){
 		this.io = io;
@@ -38,8 +62,6 @@ class GameServerSocket {
 
 	setup(){
 		this.io.on('connection', (socket) => {
-
-			console.log(`${socket.id} connected`);
 
 			socket.on('CREATE_GAME', (game, callback) => {
 				let password = game.password;
@@ -82,7 +104,7 @@ class GameServerSocket {
 							}
 							game.players.push({player: userId, socketId: socket.id});
 							game.messages.push({
-								sender: user.displayName,
+								sender: systemSender,
 								message: `${user.displayName} has joined`,
 								timeStamp: (new Date()).toUTCString()
 							});
@@ -127,7 +149,7 @@ class GameServerSocket {
 							{
 								$pull: {players: {socketId: socket.id}},
 								$push: {messages:{
-										sender: player.displayName,
+										sender: systemSender,
 										message: `${player.displayName} has left`,
 										timeStamp: (new Date()).toUTCString()
 									}}
@@ -183,6 +205,14 @@ class GameServerSocket {
 								message: message,
 								timeStamp: (new Date()).toUTCString()
 							});
+							const parsedMessage = this.parseCommand(player.displayName, message);
+							if(message !== parsedMessage){
+								newGame.messages.push({
+									sender: systemSender,
+									message: parsedMessage,
+									timeStamp: (new Date()).toUTCString()
+								});
+							}
 							newGame.save((error) => {
 								if(!error){
 									socket.broadcast.emit('SET_GAME', newGame);
@@ -200,7 +230,6 @@ class GameServerSocket {
 			});
 
 			socket.on('disconnect', () => {
-				console.log(`${socket.id} disconnected`);
 				Game.findOne({'players.socketId': socket.id}, (error, game) => {
 					if(game){
 						this.populateGame(game, (error, newGame) => {
@@ -209,7 +238,7 @@ class GameServerSocket {
 								{
 									$pull: {players: {socketId: socket.id}},
 									$push: {messages:{
-											sender: player.displayName,
+											sender: systemSender,
 											message: `${player.displayName} has left`,
 											timeStamp: (new Date()).toUTCString()
 										}}
@@ -226,6 +255,18 @@ class GameServerSocket {
 				});
 			});
 		});
+	}
+
+	parseCommand(sender, message) {
+		for(let command of commands){
+			if(message.search(command.regex) !== -1){
+				return command.exec(sender, message);
+			}
+		}
+		if(message.search('/') === 0 ){
+			return `Command not recognized: ${message}`;
+		}
+		return message;
 	}
 }
 
