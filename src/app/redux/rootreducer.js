@@ -211,7 +211,7 @@ class RootReducer {
 				a: 1
 			},
 			on: GameActionFactory.BRUSH_OFF,
-			type: GameActionFactory.BRUSH_CIRCLE,
+			type: GameActionFactory.BRUSH_LINE,
 			size: 10,
 			filled: true
 		}

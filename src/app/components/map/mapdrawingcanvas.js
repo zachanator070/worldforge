@@ -19,19 +19,15 @@ class MapDrawingCanvas extends Component{
 	startDrawing = () => {
 		if(this.refs.brush && this.refs.canvasContainer){
 			this.draw();
-			if(this.props.brushOptions.type === GameActionFactory.BRUSH_LINE){
-				this.refs.brush.addEventListener('mousemove', this.draw, false);
-				this.refs.canvasContainer.addEventListener('mousemove', this.draw, false);
-			}
+			this.refs.brush.addEventListener('mousemove', this.draw, false);
+			this.refs.canvasContainer.addEventListener('mousemove', this.draw, false);
 		}
 	};
 
 	stopDrawing = () => {
 		if(this.refs.brush && this.refs.canvasContainer){
-			if(this.props.brushOptions.type === GameActionFactory.BRUSH_LINE) {
-				this.refs.brush.removeEventListener('mousemove', this.draw, false);
-				this.refs.canvasContainer.removeEventListener('mousemove', this.draw, false);
-			}
+			this.refs.brush.removeEventListener('mousemove', this.draw, false);
+			this.refs.canvasContainer.removeEventListener('mousemove', this.draw, false);
 			this.setState({
 				currentPath: [],
 				strokesDrawn: this.state.strokesDrawn.splice(this.state.strokesDrawn.indexOf(this.currentPathUuid), 1 )
@@ -59,43 +55,46 @@ class MapDrawingCanvas extends Component{
 				break;
 			}
 			context.strokeStyle = `rgba(${stroke.color.r}, ${stroke.color.g}, ${stroke.color.b}, ${stroke.color.a})`;
+			context.fillStyle = `rgba(${stroke.color.r}, ${stroke.color.g}, ${stroke.color.b}, ${stroke.color.a})`;
 
 			switch(stroke.type) {
 				case GameActionFactory.BRUSH_BOX: {
-					const size = stroke.size * this.props.currentGame.zoom;
-					const path = stroke.path[0];
-					context.lineWidth = 5;
-					const x = path.x * this.props.currentGame.zoom - size/2;
-					const y = path.y * this.props.currentGame.zoom - size/2;
-					if(this.state.nodesDrawn.includes(path._id)){
-						break;
+					for(let path of stroke.path) {
+						const size = stroke.size * this.props.currentGame.zoom;
+						context.lineWidth = 5;
+						const x = path.x * this.props.currentGame.zoom - size / 2;
+						const y = path.y * this.props.currentGame.zoom - size / 2;
+						if (this.state.nodesDrawn.includes(path._id)) {
+							continue;
+						}
+						if (stroke.filled) {
+							context.fillRect(x, y, size, size);
+						} else {
+							context.strokeRect(x, y, size, size);
+						}
+						recentlyDrawnNodes.push(path._id);
 					}
-					if (stroke.filled) {
-						context.fillRect(x, y, size, size);
-					} else {
-						context.strokeRect(x, y, size, size);
-					}
-					recentlyDrawnNodes.push(path._id);
 					break;
 				}
 				case GameActionFactory.BRUSH_CIRCLE: {
-					const path = stroke.path[0];
-					if(this.state.nodesDrawn.includes(path._id)){
-						break;
+					for(let path of stroke.path) {
+						if (this.state.nodesDrawn.includes(path._id)) {
+							continue;
+						}
+						const size = stroke.size * this.props.currentGame.zoom;
+						const x = path.x * this.props.currentGame.zoom;
+						const y = path.y * this.props.currentGame.zoom;
+						context.lineWidth = 5; //maybe make this configurable one day
+						context.beginPath();
+						if (stroke.filled) {
+							context.ellipse(x, y, size / 2, size / 2, 0, 0, Math.PI * 2);
+							context.fill();
+						} else {
+							context.ellipse(x, y, size / 2, size / 2, 0, 0, Math.PI * 2);
+							context.stroke();
+						}
+						recentlyDrawnNodes.push(path._id);
 					}
-					const size = stroke.size * this.props.currentGame.zoom;
-					const x = path.x * this.props.currentGame.zoom;
-					const y = path.y * this.props.currentGame.zoom;
-					context.lineWidth = 5; //maybe make this configurable one day
-					context.beginPath();
-					if (stroke.filled) {
-						context.ellipse(x, y, size/2, size/2, 0, 0, Math.PI * 2);
-						context.fill();
-					} else {
-						context.ellipse(x, y, size/2, size/2, 0, 0, Math.PI * 2);
-						context.stroke();
-					}
-					recentlyDrawnNodes.push(path._id);
 					break;
 				}
 				case GameActionFactory.BRUSH_LINE:
@@ -120,6 +119,20 @@ class MapDrawingCanvas extends Component{
 						}
 					}
 					context.stroke();
+					break;
+				}
+				case GameActionFactory.BRUSH_ERASER:
+				{
+					for(let path of stroke.path) {
+						if (this.state.nodesDrawn.includes(path._id)) {
+							continue;
+						}
+						const size = stroke.size * this.props.currentGame.zoom;
+						const x = path.x * this.props.currentGame.zoom - size / 2;
+						const y = path.y * this.props.currentGame.zoom - size / 2;
+						context.clearRect(x, y, size, size);
+						recentlyDrawnNodes.push(path._id);
+					}
 					break;
 				}
 				default:
@@ -173,7 +186,7 @@ class MapDrawingCanvas extends Component{
 		};
 		const colorObj = this.props.brushOptions.color;
 		const color = `rgba(${colorObj.r}, ${colorObj.g}, ${colorObj.b}, ${colorObj.a})`;
-		if(this.props.brushOptions.filled || this.props.brushOptions.type === GameActionFactory.BRUSH_LINE){
+		if((this.props.brushOptions.filled || this.props.brushOptions.type === GameActionFactory.BRUSH_LINE) && this.props.brushOptions.type !== GameActionFactory.BRUSH_ERASER){
 			style.backgroundColor = color;
 		}
 		else if(this.props.brushOptions.type === GameActionFactory.BRUSH_ERASER){
